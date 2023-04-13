@@ -1,5 +1,7 @@
 #include "AppWindow.h"
 #include "Math.h"
+#include "Structs.h"
+#include "Windows.h"
 
 void AppWindow::onCreate() 
 {
@@ -26,15 +28,21 @@ void AppWindow::onCreate()
 	size_t sizeShader = 0;
 
 	GraphicsEngine::get()->compileVertexShader(L"TestShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
-	m_vs = GraphicsEngine::get()->createVertexShader(shaderByteCode, sizeShader);
+	m_vertexShader = GraphicsEngine::get()->createVertexShader(shaderByteCode, sizeShader);
 
 	m_vertexBuffer->load(list, sizeof(Vertex), sizeList, shaderByteCode, sizeShader);
 	GraphicsEngine::get()->releaseCompiledShader();
 
 	GraphicsEngine::get()->compilePixelShader(L"TestShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
-	m_ps = GraphicsEngine::get()->createPixelShader(shaderByteCode, sizeShader);
+	m_pixelShader = GraphicsEngine::get()->createPixelShader(shaderByteCode, sizeShader);
 
 	GraphicsEngine::get()->releaseCompiledShader();
+
+	Constants cc;
+	cc.Time = 0;
+
+	m_constBuffer = GraphicsEngine::get()->createConstantBuffer();
+	m_constBuffer->load(&cc, sizeof(Constants));
 }
 
 void AppWindow::onUpdate() 
@@ -45,8 +53,15 @@ void AppWindow::onUpdate()
 
 	RECT rc = this->getClientWindowRect();
 	GraphicsEngine::get()->getImmediateDeviceContext()->setViewportSize((rc.right - rc.left), (rc.bottom - rc.top));
-	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexShader(m_vs);
-	GraphicsEngine::get()->getImmediateDeviceContext()->setPixelShader(m_ps);
+
+	Constants cc;
+	cc.Time = GetTickCount64();
+	m_constBuffer->update(GraphicsEngine::get()->getImmediateDeviceContext(), &cc);
+	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_vertexShader, m_constBuffer);
+	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_pixelShader, m_constBuffer);
+
+	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexShader(m_vertexShader);
+	GraphicsEngine::get()->getImmediateDeviceContext()->setPixelShader(m_pixelShader);
 
 	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexBuffer(m_vertexBuffer);
 	GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleStrip(m_vertexBuffer->getSizeVertexList(), 0);
@@ -59,7 +74,7 @@ void AppWindow::onDestroy()
 	Window::onDestroy();
 	m_vertexBuffer->release();
 	m_swapChain->release();
-	m_ps->release();
-	m_vs->release();
+	m_pixelShader->release();
+	m_vertexShader->release();
 	GraphicsEngine::get()->release();
 }

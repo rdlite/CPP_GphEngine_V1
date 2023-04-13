@@ -20,6 +20,16 @@ void DeviceContext::setVertexBuffer(VertexBuffer* vertexBuffer)
 	m_deviceContext->IASetInputLayout(vertexBuffer->m_layout);
 }
 
+void DeviceContext::setConstantBuffer(VertexShader* shader, ConstantBuffer* buffer)
+{
+	m_deviceContext->VSSetConstantBuffers(0, 1, &buffer->m_buffer);
+}
+
+void DeviceContext::setConstantBuffer(PixelShader* shader, ConstantBuffer* buffer)
+{
+	m_deviceContext->PSSetConstantBuffers(0, 1, &buffer->m_buffer);
+}
+
 void DeviceContext::drawTriangleList(UINT vertexCount, UINT startVertexIndex)
 {
 	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
