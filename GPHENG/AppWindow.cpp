@@ -12,10 +12,10 @@ void AppWindow::onCreate()
 
 	Vertex list[] =
 	{
-		{-0.5f, -0.5f, 0.0f},
-		{-0.5f, 0.5f, 0.0f},
-		{0.5f, -0.5f, 0.0f},
-		{0.5f, 0.5f, 0.0f},
+		{-0.5f, -0.5f, 0.0f,	1, 0, 0},
+		{-0.5f, 0.5f, 0.0f,		0, 1, 0},
+		{0.5f, -0.5f, 0.0f,		0, 0, 1},
+		{0.5f, 0.5f, 0.0f,		1, 1, 0},
 	};
 
 	m_vertexBuffer = GraphicsEngine::get()->createVertexBuffer();
@@ -61,6 +61,5 @@ void AppWindow::onDestroy()
 	m_swapChain->release();
 	m_ps->release();
 	m_vs->release();
-	m_swapChain->release();
 	GraphicsEngine::get()->release();
 }

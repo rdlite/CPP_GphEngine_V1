@@ -6,4 +6,5 @@ struct Vector3
 struct Vertex
 {
 	Vector3 position;
+	Vector3 Color;
 };
