@@ -1,3 +1,0 @@
-﻿  AppWindow.cpp
-C:\Users\rdlit\GphEngines\1\GPHENG\CPP_GphEngine_V1\GPHENG\AppWindow.cpp(31,81): warning C4267: 'argument': conversion from 'size_t' to 'UINT', possible loss of data
-  GPHENG.vcxproj -> C:\Users\rdlit\GphEngines\1\GPHENG\CPP_GphEngine_V1\x64\Debug\GPHENG.exe

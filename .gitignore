@@ -1,1 +1,4 @@
 ﻿.vs
+*.tlog
+GPHENG/x64/Debug
+x64/Debug
