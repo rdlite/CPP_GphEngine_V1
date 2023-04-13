@@ -16,4 +16,5 @@ private:
 	SwapChain* m_swapChain;
 	VertexBuffer* m_vertexBuffer;
 	VertexShader* m_vs;
+	PixelShader* m_ps;
 };

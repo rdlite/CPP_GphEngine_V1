@@ -4,12 +4,14 @@
 #include "DeviceContext.h"
 #include "VertexBuffer.h"
 #include "VertexShader.h"
+#include "PixelShader.h"
 #include "d3dcompiler.h"
 
 class SwapChain;
 class DeviceContext;
 class VertexBuffer;
 class VertexShader;
+class PixelShader;
 
 class GraphicsEngine
 {
@@ -17,13 +19,13 @@ public:
 	bool init();
 	bool release();
 	bool compileVertexShader(const wchar_t* fileName, const char* entryPointName, void** shaderByteCode, size_t* byteCodeSize);
+	bool compilePixelShader(const wchar_t* fileName, const char* entryPointName, void** shaderByteCode, size_t* byteCodeSize);
 	void releaseCompiledShader();
-	void createShaders();
-	void setShaders();
 	SwapChain* createSwapChain();
 	DeviceContext* getImmediateDeviceContext();
 	VertexBuffer* createVertexBuffer();
 	VertexShader* createVertexShader(const void* shaderByteCode, size_t byteCodeSize);
+	PixelShader* createPixelShader(const void* shaderByteCode, size_t byteCodeSize);
 public:
 	static GraphicsEngine* get();
 private:
@@ -40,10 +42,9 @@ private:
 	ID3DBlob* m_blob = nullptr;
 	ID3DBlob* m_vsblob = nullptr;
 	ID3DBlob* m_psblob = nullptr;
-	ID3D11VertexShader* m_vs = nullptr;
-	ID3D11PixelShader* m_ps = nullptr;
 
 	friend class SwapChain;
 	friend class VertexBuffer;
 	friend class VertexShader;
+	friend class PixelShader;
 };
