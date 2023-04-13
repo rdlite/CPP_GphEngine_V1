@@ -3,23 +3,27 @@
 #include "SwapChain.h"
 #include "DeviceContext.h"
 #include "VertexBuffer.h"
+#include "VertexShader.h"
 #include "d3dcompiler.h"
 
 class SwapChain;
 class DeviceContext;
 class VertexBuffer;
+class VertexShader;
 
 class GraphicsEngine
 {
 public:
 	bool init();
 	bool release();
+	bool compileVertexShader(const wchar_t* fileName, const char* entryPointName, void** shaderByteCode, size_t* byteCodeSize);
+	void releaseCompiledShader();
 	void createShaders();
 	void setShaders();
-	void getShaderBufferAndSize(void** bytecode, UINT* size);
 	SwapChain* createSwapChain();
 	DeviceContext* getImmediateDeviceContext();
 	VertexBuffer* createVertexBuffer();
+	VertexShader* createVertexShader(const void* shaderByteCode, size_t byteCodeSize);
 public:
 	static GraphicsEngine* get();
 private:
@@ -33,6 +37,7 @@ private:
 
 	DeviceContext* m_deviceContext;
 
+	ID3DBlob* m_blob = nullptr;
 	ID3DBlob* m_vsblob = nullptr;
 	ID3DBlob* m_psblob = nullptr;
 	ID3D11VertexShader* m_vs = nullptr;
@@ -40,4 +45,5 @@ private:
 
 	friend class SwapChain;
 	friend class VertexBuffer;
+	friend class VertexShader;
 };

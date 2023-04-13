@@ -33,7 +33,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 bool Window::init()
 {
 	const wchar_t CLASS_NAME[] = L"MyWindowClass";
-	const wchar_t APP_DESCRIPTION[] = L"DirectX Application";
+	const wchar_t APP_DESCRIPTION[] = L"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 	WNDCLASSEX wc;
 	wc.cbClsExtra = NULL;

@@ -44,6 +44,11 @@ void DeviceContext::setViewportSize(UINT width, UINT height)
 	m_deviceContext->RSSetViewports(1, &vp);
 }
 
+void DeviceContext::setVertexShader(VertexShader* vertexShader)
+{
+	m_deviceContext->VSSetShader(vertexShader->m_vs, nullptr, 0);
+}
+
 bool DeviceContext::release()
 {
 	m_deviceContext->Release();

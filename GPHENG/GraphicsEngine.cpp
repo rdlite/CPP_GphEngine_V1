@@ -70,7 +70,6 @@ bool GraphicsEngine::release()
 
 	return true;
 }
-
 SwapChain* GraphicsEngine::createSwapChain()
 {
 	return new SwapChain();
@@ -86,29 +85,62 @@ VertexBuffer* GraphicsEngine::createVertexBuffer()
 	return new VertexBuffer();
 }
 
+VertexShader* GraphicsEngine::createVertexShader(const void* shaderByteCode, size_t byteCodeSize)
+{
+	VertexShader* vertexShader = new VertexShader();
+
+	if (!vertexShader->init(shaderByteCode, byteCodeSize))
+	{
+		vertexShader->release();
+		return nullptr;
+	}
+
+	return vertexShader;
+}
+
 GraphicsEngine* GraphicsEngine::get()
 {
 	static GraphicsEngine engine;
 	return &engine;
 }
 
+bool GraphicsEngine::compileVertexShader(const wchar_t* fileName, const char* entryPointName, void** shaderByteCode, size_t* byteCodeSize)
+{
+	ID3DBlob* errblob = nullptr;
+	HRESULT result = D3DCompileFromFile(fileName, nullptr, nullptr, entryPointName, "vs_5_0", 0, 0, &m_blob, &errblob);
+
+	if (FAILED(result))
+	{
+		if (errblob)
+		{
+			errblob->Release();
+		}
+
+		return false;
+	}
+
+	*shaderByteCode = m_blob->GetBufferPointer();
+	*byteCodeSize = m_blob->GetBufferSize();
+
+	return true;
+}
+
+void GraphicsEngine::releaseCompiledShader()
+{
+	if (m_blob)
+	{
+		m_blob->Release();
+	}
+}
+
 void GraphicsEngine::createShaders()
 {
 	ID3DBlob* errblob = nullptr;
-	D3DCompileFromFile(L"shader.fx", nullptr, nullptr, "vsmain", "vs_5_0", NULL, NULL, &m_vsblob, &errblob);
-	D3DCompileFromFile(L"shader.fx", nullptr, nullptr, "psmain", "ps_5_0", NULL, NULL, &m_psblob, &errblob);
-	m_d3dDevice->CreateVertexShader(m_vsblob->GetBufferPointer(), m_vsblob->GetBufferSize(), nullptr, &m_vs);
+	D3DCompileFromFile(L"TestShader.hlsl", nullptr, nullptr, "psmain", "ps_5_0", NULL, NULL, &m_psblob, &errblob);
 	m_d3dDevice->CreatePixelShader(m_psblob->GetBufferPointer(), m_psblob->GetBufferSize(), nullptr, &m_ps);
 }
 
 void GraphicsEngine::setShaders()
 {
-	m_immContext->VSSetShader(m_vs, nullptr, 0);
 	m_immContext->PSSetShader(m_ps, nullptr, 0);
-}
-
-void GraphicsEngine::getShaderBufferAndSize(void** bytecode, UINT* size)
-{
-	*bytecode = this->m_vsblob->GetBufferPointer();
-	*size = (UINT)this->m_vsblob->GetBufferSize();
 }
