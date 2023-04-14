@@ -20,6 +20,11 @@ void DeviceContext::setVertexBuffer(VertexBuffer* vertexBuffer)
 	m_deviceContext->IASetInputLayout(vertexBuffer->m_layout);
 }
 
+void DeviceContext::setIndexBuffer(IndexBuffer* indexBuffer)
+{
+	m_deviceContext->IASetIndexBuffer(indexBuffer->m_buffer, DXGI_FORMAT_R32_UINT, 0);
+}
+
 void DeviceContext::setConstantBuffer(VertexShader* shader, ConstantBuffer* buffer)
 {
 	m_deviceContext->VSSetConstantBuffers(0, 1, &buffer->m_buffer);
@@ -36,6 +41,11 @@ void DeviceContext::drawTriangleList(UINT vertexCount, UINT startVertexIndex)
 	m_deviceContext->Draw(vertexCount, startVertexIndex);
 }
 
+void DeviceContext::drawIndexedTriangleList(UINT indexCount, UINT startVertexIndex, UINT startIndexLocation)
+{
+	m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_deviceContext->DrawIndexed(indexCount, startIndexLocation, startVertexIndex);
+}
 
 void DeviceContext::drawTriangleStrip(UINT vertexCount, UINT startVertexIndex)
 {

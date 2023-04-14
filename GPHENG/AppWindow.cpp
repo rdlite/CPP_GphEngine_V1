@@ -1,7 +1,8 @@
 #include "AppWindow.h"
 #include "Math.h"
-#include "Structs.h"
 #include "Windows.h"
+#include "cmath"
+#include "iostream"
 
 void AppWindow::onCreate() 
 {
@@ -12,17 +13,35 @@ void AppWindow::onCreate()
 	RECT rc = this->getClientWindowRect();
 	m_swapChain->init(this->m_hwnd, (rc.right - rc.left), (rc.bottom - rc.top));
 
-	Vertex list[] =
+	Vertex vertexList[] = 
 	{
-		{-0.5f, -0.5f, 0.0f,	1, 0, 0},
-		{-0.5f, 0.5f, 0.0f,		0, 1, 0},
-		{0.5f, -0.5f, 0.0f,		0, 0, 1},
-		{0.5f, 0.5f, 0.0f,		1, 1, 0},
+		{Vector3(-0.5f, -0.5f, -0.5f),		Color(0, 0, 0)},
+		{Vector3(-0.5f, 0.5f, -0.5f),		Color(0, 0, 1)},
+		{Vector3(0.5f, 0.5f, -0.5f),		Color(0, 1, 0)},
+		{Vector3(0.5f, -0.5f, -0.5f),		Color(0, 1, 1)},
+
+		{Vector3(0.5f, -0.5f, 0.5f),		Color(1, 0, 0)},
+		{Vector3(0.5f, 0.5f, 0.5f),			Color(1, 0, 1)},
+		{Vector3(-0.5f, 0.5f, 0.5f),		Color(1, 1, 0)},
+		{Vector3(-0.5f, -0.5f, 0.5f),		Color(1, 1, 1)},
 	};
 
 	m_vertexBuffer = GraphicsEngine::get()->createVertexBuffer();
+	UINT sizeVertexList = ARRAYSIZE(vertexList);
 
-	UINT sizeList = ARRAYSIZE(list);
+	unsigned int indexList[] =
+	{
+		0, 1, 2,	2, 3, 0,
+		4, 5, 6,	6, 7, 4,
+		1, 6, 5,	5, 2, 1,
+		7, 0, 3,	3, 4, 7,
+		3, 2, 5,	5, 4, 3,
+		7, 6, 1,	1, 0, 7,
+	};
+
+	m_indexBuffer = GraphicsEngine::get()->createIndexBuffer();
+	UINT sizeIndexList = ARRAYSIZE(indexList);
+	m_indexBuffer->load(indexList, sizeIndexList);
 
 	void* shaderByteCode = nullptr;
 	size_t sizeShader = 0;
@@ -30,7 +49,8 @@ void AppWindow::onCreate()
 	GraphicsEngine::get()->compileVertexShader(L"TestShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
 	m_vertexShader = GraphicsEngine::get()->createVertexShader(shaderByteCode, sizeShader);
 
-	m_vertexBuffer->load(list, sizeof(Vertex), sizeList, shaderByteCode, sizeShader);
+	m_vertexBuffer->load(vertexList, sizeof(Vertex), sizeVertexList, shaderByteCode, sizeShader);
+
 	GraphicsEngine::get()->releaseCompiledShader();
 
 	GraphicsEngine::get()->compilePixelShader(L"TestShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
@@ -54,9 +74,8 @@ void AppWindow::onUpdate()
 	RECT rc = this->getClientWindowRect();
 	GraphicsEngine::get()->getImmediateDeviceContext()->setViewportSize((rc.right - rc.left), (rc.bottom - rc.top));
 
-	Constants cc;
-	cc.Time = GetTickCount64();
-	m_constBuffer->update(GraphicsEngine::get()->getImmediateDeviceContext(), &cc);
+	updateQuadPosition();
+
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_vertexShader, m_constBuffer);
 	GraphicsEngine::get()->getImmediateDeviceContext()->setConstantBuffer(m_pixelShader, m_constBuffer);
 
@@ -64,15 +83,57 @@ void AppWindow::onUpdate()
 	GraphicsEngine::get()->getImmediateDeviceContext()->setPixelShader(m_pixelShader);
 
 	GraphicsEngine::get()->getImmediateDeviceContext()->setVertexBuffer(m_vertexBuffer);
-	GraphicsEngine::get()->getImmediateDeviceContext()->drawTriangleStrip(m_vertexBuffer->getSizeVertexList(), 0);
+	GraphicsEngine::get()->getImmediateDeviceContext()->setIndexBuffer(m_indexBuffer);
+	GraphicsEngine::get()->getImmediateDeviceContext()->drawIndexedTriangleList(m_indexBuffer->getSizeIndexList(), 0, 0);
 
 	m_swapChain->present(false);
+
+	m_oldDelta = m_newDelta;
+	m_newDelta = GetTickCount64();
+	m_deltaTime = (m_oldDelta) ? (m_newDelta - m_oldDelta) / 1000.0f : 0;
+}
+
+void AppWindow::updateQuadPosition()
+{
+	Constants cc;
+	cc.Time = GetTickCount64();
+
+	m_deltaPos += m_deltaTime * 2;
+
+	Matrix4x4 temp;
+
+	//cc.World.setScale(Vector3::lerp(Vector3(0.5f, 0.5f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), abs(sin(m_deltaPos))));
+	//temp.setTranslation(Vector3::lerp(Vector3(-.5f, 0, 0), Vector3(.5f, 0, 0), sin(m_deltaPos)));
+	//cc.World *= temp;
+
+	cc.World.setScale(Vector3(1.0f, 1.0f, 1.0f));
+	temp.setIdentity();
+	temp.setRotationX(m_deltaPos);
+	cc.World *= temp;
+	temp.setIdentity();
+	temp.setRotationY(m_deltaPos);
+	cc.World *= temp;
+	//temp.setIdentity();
+	//temp.setRotationX(m_deltaPos);
+	//cc.World *= temp;
+
+	cc.View.setIdentity();
+	cc.Proj.setOrthoLH(
+		(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
+		(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
+		-4.0f,
+		4.0f
+	);
+
+	m_constBuffer->update(GraphicsEngine::get()->getImmediateDeviceContext(), &cc);
 }
 
 void AppWindow::onDestroy() 
 {
 	Window::onDestroy();
 	m_vertexBuffer->release();
+	m_indexBuffer->release();
+	m_constBuffer->release();
 	m_swapChain->release();
 	m_pixelShader->release();
 	m_vertexShader->release();

@@ -3,6 +3,7 @@
 #include "SwapChain.h"
 #include "DeviceContext.h"
 #include "VertexBuffer.h"
+#include "IndexBuffer.h"
 #include "ConstantBuffer.h"
 #include "VertexShader.h"
 #include "PixelShader.h"
@@ -12,8 +13,10 @@ class SwapChain;
 class DeviceContext;
 class VertexBuffer;
 class ConstantBuffer;
+class IndexBuffer;
 class VertexShader;
 class PixelShader;
+class IndexShader;
 
 class GraphicsEngine
 {
@@ -26,6 +29,7 @@ public:
 	SwapChain* createSwapChain();
 	DeviceContext* getImmediateDeviceContext();
 	VertexBuffer* createVertexBuffer();
+	IndexBuffer* createIndexBuffer();
 	ConstantBuffer* createConstantBuffer();
 	VertexShader* createVertexShader(const void* shaderByteCode, size_t byteCodeSize);
 	PixelShader* createPixelShader(const void* shaderByteCode, size_t byteCodeSize);
@@ -50,5 +54,6 @@ private:
 	friend class VertexBuffer;
 	friend class ConstantBuffer;
 	friend class VertexShader;
+	friend class IndexBuffer;
 	friend class PixelShader;
 };
