@@ -9,6 +9,10 @@
 #include "VertexShader.h"
 #include "InputListener.h"
 #include "InputSystem.h"
+#include "Math.h"
+#include "Windows.h"
+#include "cmath"
+#include "iostream"
 
 class AppWindow: public Window, public InputListener
 {
@@ -18,14 +22,17 @@ public:
 	virtual void onDestroy() override;
 	virtual void onFocus(bool isFocus) override;
 
-	void updateQuadPosition();
+	void update();
 
 	virtual void onKeyDown(int key) override;
 	virtual void onKeyUp(int key) override;
-	virtual void onMouseMove(const Point& deltaMousePos) override;
+	virtual void onMouseMove(const Point& mousePos) override;
 	virtual void onMouseButtonDown(int mouseButtonID, const Point& point) override;
 	virtual void onMouseButtonUp(int mouseButtonID, const Point& point) override;
 private:
+	float getWindowWidth();
+	float getWindowHeight();
+
 	SwapChain* m_swapChain;
 	VertexBuffer* m_vertexBuffer;
 	IndexBuffer* m_indexBuffer;
@@ -33,11 +40,14 @@ private:
 	PixelShader* m_pixelShader;
 	ConstantBuffer* m_constBuffer;
 
-	float m_oldDelta, m_newDelta, m_deltaTime;
-	float m_deltaPos;
+	Matrix4x4 m_worldCamera;
+
+	float m_oldDelta = 0.0f, m_newDelta = 0.0f, m_deltaTime = 0.0f;
+	float m_deltaPos = 0.0f;
 	float m_scaleCube = 1.0f;
+	float m_forward = 0.0f, m_right = 0.0f;
 
 	float m_rotationX = 0.0f, m_rotationY = 0.0f;
 
-	bool m_isLMouseButtonPress;
+	bool m_isLMouseButtonPress = false;
 };

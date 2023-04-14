@@ -11,6 +11,9 @@ public:
 	void addListener(InputListener* listener);
 	void removeListener(InputListener* listener);
 
+	void setCursorPosition(const Point& point);
+	void setCursorVisible(bool isVisible);
+
 	static InputSystem* get();
 private:
 	std::unordered_set<InputListener*> m_listeners;
