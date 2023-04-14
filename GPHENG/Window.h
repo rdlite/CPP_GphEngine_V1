@@ -9,9 +9,12 @@ public:
 	bool broadcastWindow();
 	bool release();
 	bool isRunning();
-	virtual void onCreate()=0;
-	virtual void onUpdate()=0;
-	virtual void onDestroy()=0;
+
+	virtual void onCreate() = 0;
+	virtual void onUpdate() = 0;
+	virtual void onDestroy() = 0;
+	virtual void onFocus(bool isFocus) = 0;
+
 	RECT getClientWindowRect();
 	void setHWND(HWND hwnd);
 protected:

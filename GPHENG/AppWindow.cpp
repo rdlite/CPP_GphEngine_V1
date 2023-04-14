@@ -68,7 +68,9 @@ void AppWindow::onCreate()
 void AppWindow::onUpdate() 
 {
 	Window::onUpdate();
-	
+
+	InputSystem::get()->update();
+
 	GraphicsEngine::get()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swapChain, .0f, .3f, .4f, 1);
 
 	RECT rc = this->getClientWindowRect();
@@ -103,19 +105,19 @@ void AppWindow::updateQuadPosition()
 	Matrix4x4 temp;
 
 	//cc.World.setScale(Vector3::lerp(Vector3(0.5f, 0.5f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), abs(sin(m_deltaPos))));
-	//temp.setTranslation(Vector3::lerp(Vector3(-.5f, 0, 0), Vector3(.5f, 0, 0), sin(m_deltaPos)));
 	//cc.World *= temp;
 
-	cc.World.setScale(Vector3(1.0f, 1.0f, 1.0f));
+	cc.World.setScale(Vector3(1.0f, 1.0f, 1.0f) * m_scaleCube);
+
 	temp.setIdentity();
-	temp.setRotationX(m_deltaPos);
+	temp.setRotationZ(0.0f);
 	cc.World *= temp;
 	temp.setIdentity();
-	temp.setRotationY(m_deltaPos);
+	temp.setRotationY(m_rotationY);
 	cc.World *= temp;
-	//temp.setIdentity();
-	//temp.setRotationX(m_deltaPos);
-	//cc.World *= temp;
+	temp.setIdentity();
+	temp.setRotationX(m_rotationX);
+	cc.World *= temp;
 
 	cc.View.setIdentity();
 	cc.Proj.setOrthoLH(
@@ -126,6 +128,72 @@ void AppWindow::updateQuadPosition()
 	);
 
 	m_constBuffer->update(GraphicsEngine::get()->getImmediateDeviceContext(), &cc);
+}
+
+void AppWindow::onKeyDown(int key)
+{
+	float rotSpeed = 4.0f;
+
+	//if (key == 'W')
+	//{
+	//	m_rotationX += rotSpeed * m_deltaTime;
+	//}
+	//else if (key == 'S')
+	//{
+	//	m_rotationX -= rotSpeed * m_deltaTime;
+	//}
+	//else if (key == 'A')
+	//{
+	//	m_rotationY += rotSpeed * m_deltaTime;
+	//}
+	//else if (key == 'D')
+	//{
+	//	m_rotationY -= rotSpeed * m_deltaTime;
+	//}
+}
+
+void AppWindow::onKeyUp(int key)
+{
+
+}
+
+void AppWindow::onMouseMove(const Point& deltaMousePos)
+{
+	if (m_isLMouseButtonPress)
+	{
+		float rotSpeed = 1.0f;
+
+		m_rotationX -= rotSpeed * m_deltaTime * deltaMousePos.y;
+		m_rotationY -= rotSpeed * m_deltaTime * deltaMousePos.x;
+	}
+}
+
+void AppWindow::onMouseButtonDown(int mouseButtonID, const Point& point)
+{
+	if (mouseButtonID == 0)
+	{
+		m_isLMouseButtonPress = true;
+	}
+}
+
+void AppWindow::onMouseButtonUp(int mouseButtonID, const Point& point)
+{
+	if (mouseButtonID == 0)
+	{
+		m_isLMouseButtonPress = false;
+	}
+}
+
+void AppWindow::onFocus(bool isFocus)
+{
+	if (isFocus)
+	{
+		InputSystem::get()->addListener(this);
+	}
+	else 
+	{
+		InputSystem::get()->removeListener(this);
+	}
 }
 
 void AppWindow::onDestroy() 

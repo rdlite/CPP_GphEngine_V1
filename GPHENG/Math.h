@@ -24,6 +24,11 @@ public:
 		return res;
 	}
 
+	Vector3 operator *(const float value)
+	{
+		return Vector3(x * value, y * value, z * value);
+	}
+
 	~Vector3()
 	{
 	}
