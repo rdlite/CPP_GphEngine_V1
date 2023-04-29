@@ -1,13 +1,16 @@
+Texture2D Texture : register(t0);
+sample TextureSampler : register(s0);
+
 struct VS_INPUT
 {
-    float4 pos : POSITION;
-    float3 color : COLOR;
+    float4 pos : POSITION0;
+    float2 texcoord : TEXCOORD0;
 };
 
 struct VS_OUTPUT
 {
     float4 pos : SV_POSITION;
-    float3 color : COLOR;
+    float2 texcoord : TEXCOORD0;
 };
 
 cbuffer constant : register (b0)
@@ -26,12 +29,12 @@ VS_OUTPUT vsmain(VS_INPUT input)
     output.pos = mul(output.pos, m_view);
     output.pos = mul(output.pos, m_proj);
 
-    output.color = input.color;
+    output.texcoord = input.texcoord;
 
     return output;
 }
 
 float4 psmain(VS_OUTPUT input) : SV_Target
 {
-    return float4(input.color, 1.0f);
+    return Texture.Sample(TextureSampler, input.texcoord);
 }

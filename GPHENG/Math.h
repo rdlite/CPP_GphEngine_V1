@@ -1,5 +1,48 @@
 #include "memory"
 
+class Vector2 
+{
+public:
+	Vector2() : x(0), y(0)
+	{
+	}
+	Vector2(float _x, float _y) : x(_x), y(_y)
+	{
+	}
+	Vector2(const Vector2& vector) : x(vector.x), y(vector.y)
+	{
+	}
+	float x, y;
+
+	static Vector2 lerp(const Vector2& start, const Vector2& end, float delta)
+	{
+		Vector2 res;
+		res.x = start.x * (1.0f - delta) + end.x * delta;
+		res.y = start.y * (1.0f - delta) + end.y * delta;
+
+		return res;
+	}
+
+	Vector2 operator *(const float val)
+	{
+		return Vector2(x * val, y * val);
+	}
+
+	Vector2 operator +(const Vector2& val)
+	{
+		return Vector2(x + val.x, y + val.y);
+	}
+
+	Vector2 operator -(const Vector2& val)
+	{
+		return Vector2(x - val.x, y - val.y);
+	}
+
+	~Vector2()
+	{
+	}
+};
+
 class Vector3
 {
 public:
@@ -266,7 +309,7 @@ public:
 struct Vertex
 {
 	Vector3 Position;
-	Color Color;
+	Vector2 Texcoord;
 };
 
 __declspec(align(16))

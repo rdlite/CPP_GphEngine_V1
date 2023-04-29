@@ -38,6 +38,7 @@ private:
 	VertexShaderPtr m_vertexShader;
 	PixelShaderPtr m_pixelShader;
 	ConstantBufferPtr m_constBuffer;
+	TexturePtr m_woodTexture;
 
 	Matrix4x4 m_worldCamera;
 

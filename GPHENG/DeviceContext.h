@@ -5,6 +5,7 @@
 #include "PixelShader.h"
 #include "ConstantBuffer.h"
 #include "IndexBuffer.h"
+#include "Texture.h"
 #include "Prerequisites.h"
 
 class DeviceContext
@@ -27,6 +28,9 @@ public:
 
 	void setVertexShader(VertexShaderPtr vertexShader);
 	void setPixelShader(PixelShaderPtr pixelShader);
+
+	void setTexture(VertexShaderPtr vertexShader, TexturePtr texture);
+	void setTexture(PixelShaderPtr pixelShader, TexturePtr texture);
 
 	~DeviceContext();
 private:

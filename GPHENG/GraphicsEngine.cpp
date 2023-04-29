@@ -6,22 +6,37 @@ GraphicsEngine::GraphicsEngine()
 {
 	try
 	{
-		m_render_system = new RenderSystem();
+		m_renderSystem = new RenderSystem();
 	}
-	catch (std::exception e) 
-	{ 
+	catch (std::exception e)
+	{
+		throw e;
+	}
+
+	try
+	{
+		m_textureManager = new TextureManager();
+	}
+	catch (std::exception e)
+	{
 		throw e;
 	}
 }
 
 GraphicsEngine::~GraphicsEngine()
 {
-	delete m_render_system;
+	delete m_textureManager;
+	delete m_renderSystem;
 }
 
 RenderSystem* GraphicsEngine::getRenderSystem()
 {
-	return m_render_system;
+	return m_renderSystem;
+}
+
+TextureManager* GraphicsEngine::getTextureManager()
+{
+	return m_textureManager;
 }
 
 GraphicsEngine* GraphicsEngine::get()

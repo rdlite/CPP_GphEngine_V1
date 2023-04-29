@@ -1,4 +1,5 @@
 #include "DeviceContext.h"
+#include "iostream"
 
 DeviceContext::DeviceContext(ID3D11DeviceContext* deviceContext, RenderSystem* system) : 
 	m_deviceContext(deviceContext), m_system(system)
@@ -73,6 +74,16 @@ void DeviceContext::setVertexShader(VertexShaderPtr vertexShader)
 void DeviceContext::setPixelShader(PixelShaderPtr pixelShader)
 {
 	m_deviceContext->PSSetShader(pixelShader->m_ps, nullptr, 0);
+}
+
+void DeviceContext::setTexture(VertexShaderPtr vertexShader, TexturePtr texture)
+{
+	m_deviceContext->VSSetShaderResources(0, 1, &texture->m_shaderResourceView);
+}
+
+void DeviceContext::setTexture(PixelShaderPtr pixelShader, TexturePtr texture)
+{
+	m_deviceContext->PSSetShaderResources(0, 1, &texture->m_shaderResourceView);
 }
 
 DeviceContext::~DeviceContext()

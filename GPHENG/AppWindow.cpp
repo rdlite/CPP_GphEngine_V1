@@ -5,6 +5,9 @@ void AppWindow::onCreate()
 {
 	Window::onCreate();
 
+	//m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"..\\Assets\\Textures\\wood.jpg");
+	m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\barrel.jpg");
+
 	RECT rc = this->getClientWindowRect();
 
 	m_swapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(
@@ -12,27 +15,68 @@ void AppWindow::onCreate()
 
 	m_worldCamera.setTranslation(Vector3(0, 0, -2));
 
-	Vertex vertexList[] = 
+	Vector3 positionList[] =
 	{
-		{Vector3(-0.5f, -0.5f, -0.5f),		Color(0, 0, 0)},
-		{Vector3(-0.5f, 0.5f, -0.5f),		Color(0, 0, 1)},
-		{Vector3(0.5f, 0.5f, -0.5f),		Color(0, 1, 0)},
-		{Vector3(0.5f, -0.5f, -0.5f),		Color(0, 1, 1)},
+		{Vector3(-0.5f, -0.5f, -0.5f)},
+		{Vector3(-0.5f, 0.5f, -0.5f)},
+		{Vector3(0.5f, 0.5f, -0.5f)},
+		{Vector3(0.5f, -0.5f, -0.5f)},
 
-		{Vector3(0.5f, -0.5f, 0.5f),		Color(1, 0, 0)},
-		{Vector3(0.5f, 0.5f, 0.5f),			Color(1, 0, 1)},
-		{Vector3(-0.5f, 0.5f, 0.5f),		Color(1, 1, 0)},
-		{Vector3(-0.5f, -0.5f, 0.5f),		Color(1, 1, 1)},
+		{Vector3(0.5f, -0.5f, 0.5f)},
+		{Vector3(0.5f, 0.5f, 0.5f)},
+		{Vector3(-0.5f, 0.5f, 0.5f)},
+		{Vector3(-0.5f, -0.5f, 0.5f)},
+	};
+
+	Vector2 texcoordList[] =
+	{
+		{Vector2(0.0f, 0.0f)},
+		{Vector2(0.0f, 1.0f)},
+		{Vector2(1.0f, 0.0f)},
+		{Vector2(1.0f, 1.0f)},
+	};
+
+	Vertex vertexList[] =
+	{
+		{ positionList[0], texcoordList[1] },
+		{ positionList[1], texcoordList[0] },
+		{ positionList[2], texcoordList[2] },
+		{ positionList[3], texcoordList[3] },
+
+		{ positionList[4], texcoordList[1] },
+		{ positionList[5], texcoordList[0] },
+		{ positionList[6], texcoordList[2] },
+		{ positionList[7], texcoordList[3] },
+
+		{ positionList[1], texcoordList[1] },
+		{ positionList[6], texcoordList[0] },
+		{ positionList[5], texcoordList[2] },
+		{ positionList[2], texcoordList[3] },
+
+		{ positionList[7], texcoordList[1] },
+		{ positionList[0], texcoordList[0] },
+		{ positionList[3], texcoordList[2] },
+		{ positionList[4], texcoordList[3] },
+
+		{ positionList[3], texcoordList[1] },
+		{ positionList[2], texcoordList[0] },
+		{ positionList[5], texcoordList[2] },
+		{ positionList[4], texcoordList[3] },
+
+		{ positionList[7], texcoordList[1] },
+		{ positionList[6], texcoordList[0] },
+		{ positionList[1], texcoordList[2] },
+		{ positionList[0], texcoordList[3] }
 	};
 
 	unsigned int indexList[] =
 	{
 		0, 1, 2,	2, 3, 0,
 		4, 5, 6,	6, 7, 4,
-		1, 6, 5,	5, 2, 1,
-		7, 0, 3,	3, 4, 7,
-		3, 2, 5,	5, 4, 3,
-		7, 6, 1,	1, 0, 7,
+		8, 9, 10,	10, 11, 8,
+		12, 13, 14,	14, 15, 12,
+		16, 17, 18,	18, 19, 16,
+		20, 21, 22,	22, 23, 20,
 	};
 
 	UINT sizeIndexList = ARRAYSIZE(indexList);
@@ -41,7 +85,7 @@ void AppWindow::onCreate()
 	void* shaderByteCode = nullptr;
 	size_t sizeShader = 0;
 
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"TestShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
+	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"VertexShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
 	m_vertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shaderByteCode, sizeShader);
 
 	UINT sizeVertexList = ARRAYSIZE(vertexList);
@@ -51,7 +95,7 @@ void AppWindow::onCreate()
 
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"TestShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PixelShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
 	m_pixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
 
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
@@ -84,11 +128,13 @@ void AppWindow::onUpdate()
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(m_vertexShader);
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(m_pixelShader);
 
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(m_pixelShader, m_woodTexture);
+
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(m_vertexBuffer);
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(m_indexBuffer);
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(m_indexBuffer->getSizeIndexList(), 0, 0);
 
-	m_swapChain->present(false);
+	m_swapChain->present(true);
 
 	m_oldDelta = m_newDelta;
 	m_newDelta = GetTickCount64();
