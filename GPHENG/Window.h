@@ -1,13 +1,12 @@
 #pragma once
 #include <Windows.h>
+#include <exception>
 
 class Window
 {
 public:
 	Window();
-	bool init();
 	bool broadcastWindow();
-	bool release();
 	bool isRunning();
 
 	virtual void onCreate() = 0;
@@ -16,8 +15,10 @@ public:
 	virtual void onFocus(bool isFocus) = 0;
 
 	RECT getClientWindowRect();
-	void setHWND(HWND hwnd);
+	~Window();
 protected:
 	HWND m_hwnd;
 	bool m_isRun;
+	bool m_isInit = false;
+	bool m_isFocused = false;
 };

@@ -277,3 +277,8 @@ struct Constants
 	Matrix4x4 Proj;
 	unsigned int Time;
 };
+
+static float lerp(float start, float end, float t)
+{
+	return start * (1.0f - t) + end * t;
+}

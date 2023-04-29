@@ -1,14 +1,17 @@
 #include "VertexShader.h"
 
-bool VertexShader::init(const void* shaderByteCode, size_t byteCodeSize)
+VertexShader::VertexShader(
+	const void* shaderByteCode, size_t byteCodeSize, RenderSystem* system) : m_system(system)
 {
-	HRESULT result = GraphicsEngine::get()->m_d3dDevice->CreateVertexShader(shaderByteCode, byteCodeSize, NULL, &m_vs);
+	HRESULT result = m_system->m_d3dDevice->CreateVertexShader(shaderByteCode, byteCodeSize, NULL, &m_vs);
 
-	return SUCCEEDED(result);
+	if (FAILED(result))
+	{
+		throw std::exception("VertexBuffer not created successfully");
+	}
 }
 
-void VertexShader::release()
+VertexShader::~VertexShader()
 {
 	m_vs->Release();
-	delete this;
 }

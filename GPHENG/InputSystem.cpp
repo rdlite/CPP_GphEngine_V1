@@ -1,4 +1,19 @@
 #include "InputSystem.h"
+#include "iostream"
+
+InputSystem* InputSystem::m_system = nullptr;
+
+void InputSystem::create()
+{
+	if (m_system) return;
+	m_system = new InputSystem();
+}
+
+void InputSystem::release()
+{
+	if (!m_system) return;
+	delete m_system;
+}
 
 void InputSystem::update()
 {
@@ -23,8 +38,6 @@ void InputSystem::update()
 	}
 
 	m_oldMousePos = Point(currentMousePos.x, currentMousePos.y);
-
-
 
 	if (GetKeyboardState(m_keysState))
 	{
@@ -119,6 +132,5 @@ void InputSystem::setCursorVisible(bool isVisible)
 
 InputSystem* InputSystem::get()
 {
-	static InputSystem inputSystem;
-	return &inputSystem;
+	return m_system;
 }

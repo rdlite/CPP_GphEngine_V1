@@ -1,24 +1,16 @@
 #include "Window.h"
 #include "iostream"
 
-Window::Window()
-{
-	m_hwnd = NULL;
-	m_isRun = false;
-}
-
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK WndProc(
+	HWND hwnd, UINT msg, WPARAM wparam, 
+	LPARAM lparam) {
 	switch (msg) {
 	case WM_CREATE: {
-		Window* window = (Window*)((LPCREATESTRUCT)lparam)->lpCreateParams;
-		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
-		window->setHWND(hwnd);
-		window->onCreate();
 		break;
 	}
 	case WM_SETFOCUS: {
 		Window* window = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-		window->onFocus(true);
+		if (window) window->onFocus(true);
 		break;
 	}
 	case WM_KILLFOCUS: {
@@ -40,8 +32,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	return NULL;
 }
 
-bool Window::init()
+Window::Window()
 {
+	m_hwnd = NULL;
+	m_isRun = false;
+
 	const wchar_t CLASS_NAME[] = L"MyWindowClass";
 	const wchar_t APP_DESCRIPTION[] = L"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -59,12 +54,13 @@ bool Window::init()
 	wc.style = NULL;
 	wc.lpfnWndProc = &WndProc;
 
-	if (!::RegisterClassEx(&wc)) {
-		return false;
+	if (!::RegisterClassEx(&wc)) 
+	{
+		throw std::exception("Window is not initialized");
 	}
 
 	m_hwnd = ::CreateWindowEx(
-		WS_EX_OVERLAPPEDWINDOW, 
+		WS_EX_OVERLAPPEDWINDOW,
 		CLASS_NAME,
 		APP_DESCRIPTION,
 		WS_OVERLAPPEDWINDOW,
@@ -72,12 +68,13 @@ bool Window::init()
 		CW_USEDEFAULT,
 		1024, 768,
 		NULL,
-		NULL, 
-		NULL, 
-		this);
+		NULL,
+		NULL,
+		NULL);
 
-	if (!m_hwnd) {
-		return false;
+	if (!m_hwnd) 
+	{
+		throw std::exception("Window is not initialized");
 	}
 
 	::ShowWindow(m_hwnd, SW_SHOW);
@@ -85,12 +82,19 @@ bool Window::init()
 
 	m_isRun = true;
 
-	return true;
 }
 
 bool Window::broadcastWindow()
 {
 	MSG msg;
+
+	if (!this->m_isInit)
+	{
+		SetWindowLongPtr(m_hwnd, GWLP_USERDATA, (LONG_PTR)this);
+		this->onCreate();
+		this->onFocus(true);
+		this->m_isInit = true;
+	}
 
 	this->onUpdate();
 
@@ -104,17 +108,9 @@ bool Window::broadcastWindow()
 	return true;
 }
 
-bool Window::isRunning() {
-	return m_isRun;
-}
-
-bool Window::release()
+bool Window::isRunning() 
 {
-	if (!::DestroyWindow(m_hwnd)) {
-		return false;
-	}
-
-	return true;
+	return m_isRun;
 }
 
 void Window::onDestroy()
@@ -129,9 +125,9 @@ RECT Window::getClientWindowRect()
 	return rc;
 }
 
-void Window::setHWND(HWND hwnd)
+Window::~Window()
 {
-	this->m_hwnd = hwnd;
+
 }
 
 void Window::onCreate()

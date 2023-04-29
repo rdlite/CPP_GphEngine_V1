@@ -1,11 +1,8 @@
 #include "VertexBuffer.h"
 
-VertexBuffer::VertexBuffer() : m_layout(0), m_buffer(0)
-{
-
-}
-
-bool VertexBuffer::load(void* listVertices, UINT sizeVertex, UINT sizeList, void* shaderByteCode, UINT sizeByteShader)
+VertexBuffer::VertexBuffer(
+	void* listVertices, UINT sizeVertex, UINT sizeList, 
+	void* shaderByteCode, UINT sizeByteShader, RenderSystem* system) : m_system(system), m_layout(0), m_buffer(0)
 {
 	if (m_buffer) m_buffer->Release();
 	if (m_layout) m_layout->Release();
@@ -23,11 +20,11 @@ bool VertexBuffer::load(void* listVertices, UINT sizeVertex, UINT sizeList, void
 	m_sizeVertex = sizeVertex;
 	m_sizeList = sizeList;
 
-	HRESULT result = GraphicsEngine::get()->m_d3dDevice->CreateBuffer(&buffDesc, &initData, &m_buffer);
+	HRESULT result = m_system->m_d3dDevice->CreateBuffer(&buffDesc, &initData, &m_buffer);
 
-	if (FAILED(result)) 
+	if (FAILED(result))
 	{
-		return false;
+		throw std::exception("VertexBuffer not created successfully");
 	}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -48,14 +45,12 @@ bool VertexBuffer::load(void* listVertices, UINT sizeVertex, UINT sizeList, void
 
 	UINT sizeLayout = ARRAYSIZE(layout);
 
-	result = GraphicsEngine::get()->m_d3dDevice->CreateInputLayout(layout, sizeLayout, shaderByteCode, sizeByteShader, &m_layout);
+	result = m_system->m_d3dDevice->CreateInputLayout(layout, sizeLayout, shaderByteCode, sizeByteShader, &m_layout);
 
 	if (FAILED(result))
 	{
-		return false;
+		throw std::exception("VertexBuffer not created successfully");
 	}
-
-	return true;
 }
 
 UINT VertexBuffer::getSizeVertexList()
@@ -63,11 +58,8 @@ UINT VertexBuffer::getSizeVertexList()
 	return this->m_sizeList;
 }
 
-bool VertexBuffer::release()
+VertexBuffer::~VertexBuffer()
 {
 	m_layout->Release();
 	m_buffer->Release();
-	delete this;
-
-	return true;
 }

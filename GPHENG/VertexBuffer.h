@@ -1,17 +1,20 @@
 #pragma once
 #include "GraphicsEngine.h"
 #include <d3d11.h>
-
-class DeviceContext;
+#include "Prerequisites.h"
+#include <exception>
 
 class VertexBuffer
 {
 public:
-	VertexBuffer();
-	bool load(void* listVertices, UINT sizeVertex, UINT sizeList, void* shaderByteCode, UINT sizeByteShader);
+	VertexBuffer(
+		void* listVertices, UINT sizeVertex, UINT sizeList, 
+		void* shaderByteCode, UINT sizeByteShader, RenderSystem* system);
 	UINT getSizeVertexList();
-	bool release();
+	~VertexBuffer();
 private:
+	RenderSystem* m_system = nullptr;
+
 	UINT m_sizeVertex;
 	UINT m_sizeList;
 	ID3D11Buffer* m_buffer;
