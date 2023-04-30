@@ -1,19 +1,19 @@
 Texture2D Texture : register(t0);
-sample TextureSampler : register(s0);
+sampler TextureSampler : register(s0);
 
 struct VS_INPUT
 {
-    float4 pos : POSITION0;
-    float2 texcoord : TEXCOORD0;
+    float4 position: POSITION0;
+    float2 texcoord: TEXCOORD0;
 };
 
 struct VS_OUTPUT
 {
-    float4 pos : SV_POSITION;
-    float2 texcoord : TEXCOORD0;
+    float4 position: SV_POSITION;
+    float2 texcoord: TEXCOORD0;
 };
 
-cbuffer constant : register (b0)
+cbuffer constant: register(b0)
 {
     row_major float4x4 m_world;
     row_major float4x4 m_view;
@@ -25,16 +25,15 @@ VS_OUTPUT vsmain(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
 
-    output.pos = mul(input.pos, m_world);
-    output.pos = mul(output.pos, m_view);
-    output.pos = mul(output.pos, m_proj);
+    output.position = mul(input.position, m_world);
+    output.position = mul(output.position, m_view);
+    output.position = mul(output.position, m_proj);
 
     output.texcoord = input.texcoord;
-
     return output;
 }
 
-float4 psmain(VS_OUTPUT input) : SV_Target
+float4 psmain(VS_OUTPUT input) : SV_TARGET
 {
-    return Texture.Sample(TextureSampler, input.texcoord);
+	return Texture.Sample(TextureSampler, input.texcoord * 0.5f);
 }

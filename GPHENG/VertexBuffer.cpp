@@ -1,12 +1,12 @@
 #include "VertexBuffer.h"
+#include "RenderSystem.h"
+#include <iostream>
+#include <exception>
 
 VertexBuffer::VertexBuffer(
 	void* listVertices, UINT sizeVertex, UINT sizeList, 
-	void* shaderByteCode, UINT sizeByteShader, RenderSystem* system) : m_system(system), m_layout(0), m_buffer(0)
+	void* shaderByteCode, UINT sizeByteShader, RenderSystem* system) : m_system(system)
 {
-	if (m_buffer) m_buffer->Release();
-	if (m_layout) m_layout->Release();
-
 	D3D11_BUFFER_DESC buffDesc = {};
 	buffDesc.Usage = D3D11_USAGE_DEFAULT;
 	buffDesc.ByteWidth = sizeVertex * sizeList;

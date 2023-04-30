@@ -1,4 +1,5 @@
 #include "RenderSystem.h"
+#include <iostream>
 
 RenderSystem::RenderSystem()
 {
@@ -49,7 +50,6 @@ RenderSystem::RenderSystem()
 	m_d3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&m_dxgiDevice);
 	m_dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&m_dxgiAdapter);
 	m_dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&m_dxgiFactory);
-
 }
 
 SwapChainPtr RenderSystem::createSwapChain(
@@ -83,7 +83,7 @@ VertexBufferPtr RenderSystem::createVertexBuffer(
 			listVertices, sizeVertex, sizeList,
 			shaderByteCode, sizeByteShader, this);
 	}
-	catch (...) {}
+	catch (...)  { }
 
 	return vb;
 }

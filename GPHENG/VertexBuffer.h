@@ -1,8 +1,6 @@
 #pragma once
-#include "GraphicsEngine.h"
 #include <d3d11.h>
 #include "Prerequisites.h"
-#include <exception>
 
 class VertexBuffer
 {

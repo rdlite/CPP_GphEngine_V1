@@ -6,98 +6,25 @@ void AppWindow::onCreate()
 	Window::onCreate();
 
 	//m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"..\\Assets\\Textures\\wood.jpg");
-	m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\barrel.jpg");
+	m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wood.jpg");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\monke.obj");
 
 	RECT rc = this->getClientWindowRect();
 
 	m_swapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(
 		this->m_hwnd, (rc.right - rc.left), (rc.bottom - rc.top));
 
-	m_worldCamera.setTranslation(Vector3(0, 0, -2));
-
-	Vector3 positionList[] =
-	{
-		{Vector3(-0.5f, -0.5f, -0.5f)},
-		{Vector3(-0.5f, 0.5f, -0.5f)},
-		{Vector3(0.5f, 0.5f, -0.5f)},
-		{Vector3(0.5f, -0.5f, -0.5f)},
-
-		{Vector3(0.5f, -0.5f, 0.5f)},
-		{Vector3(0.5f, 0.5f, 0.5f)},
-		{Vector3(-0.5f, 0.5f, 0.5f)},
-		{Vector3(-0.5f, -0.5f, 0.5f)},
-	};
-
-	Vector2 texcoordList[] =
-	{
-		{Vector2(0.0f, 0.0f)},
-		{Vector2(0.0f, 1.0f)},
-		{Vector2(1.0f, 0.0f)},
-		{Vector2(1.0f, 1.0f)},
-	};
-
-	Vertex vertexList[] =
-	{
-		{ positionList[0], texcoordList[1] },
-		{ positionList[1], texcoordList[0] },
-		{ positionList[2], texcoordList[2] },
-		{ positionList[3], texcoordList[3] },
-
-		{ positionList[4], texcoordList[1] },
-		{ positionList[5], texcoordList[0] },
-		{ positionList[6], texcoordList[2] },
-		{ positionList[7], texcoordList[3] },
-
-		{ positionList[1], texcoordList[1] },
-		{ positionList[6], texcoordList[0] },
-		{ positionList[5], texcoordList[2] },
-		{ positionList[2], texcoordList[3] },
-
-		{ positionList[7], texcoordList[1] },
-		{ positionList[0], texcoordList[0] },
-		{ positionList[3], texcoordList[2] },
-		{ positionList[4], texcoordList[3] },
-
-		{ positionList[3], texcoordList[1] },
-		{ positionList[2], texcoordList[0] },
-		{ positionList[5], texcoordList[2] },
-		{ positionList[4], texcoordList[3] },
-
-		{ positionList[7], texcoordList[1] },
-		{ positionList[6], texcoordList[0] },
-		{ positionList[1], texcoordList[2] },
-		{ positionList[0], texcoordList[3] }
-	};
-
-	unsigned int indexList[] =
-	{
-		0, 1, 2,	2, 3, 0,
-		4, 5, 6,	6, 7, 4,
-		8, 9, 10,	10, 11, 8,
-		12, 13, 14,	14, 15, 12,
-		16, 17, 18,	18, 19, 16,
-		20, 21, 22,	22, 23, 20,
-	};
-
-	UINT sizeIndexList = ARRAYSIZE(indexList);
-	m_indexBuffer = GraphicsEngine::get()->getRenderSystem()->createIndexBuffer(indexList, sizeIndexList);
+	m_worldCamera.setTranslation(Vector3(0, 0, -4));
 
 	void* shaderByteCode = nullptr;
 	size_t sizeShader = 0;
 
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"VertexShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
+	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"TestShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
 	m_vertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shaderByteCode, sizeShader);
-
-	UINT sizeVertexList = ARRAYSIZE(vertexList);
-	m_vertexBuffer = GraphicsEngine::get()->getRenderSystem()->createVertexBuffer(
-		vertexList, sizeof(Vertex), sizeVertexList, 
-		shaderByteCode, sizeShader);
-
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PixelShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"TestShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
 	m_pixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
-
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
 	Constants cc;
@@ -130,9 +57,9 @@ void AppWindow::onUpdate()
 
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(m_pixelShader, m_woodTexture);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(m_vertexBuffer);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(m_indexBuffer);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(m_indexBuffer->getSizeIndexList(), 0, 0);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(m_mesh->getVertexBuffer());
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(m_mesh->getIndexBuffer());
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(m_mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
 
 	m_swapChain->present(true);
 
@@ -144,7 +71,7 @@ void AppWindow::onUpdate()
 void AppWindow::update()
 {
 	Constants cc;
-	cc.Time = GetTickCount64();
+	cc.Time = ::GetTickCount64();
 
 	m_deltaPos += m_deltaTime * .5f;
 
@@ -195,27 +122,27 @@ void AppWindow::update()
 
 void AppWindow::onKeyDown(int key)
 {
-	float rotSpeed = 4.0f;
+	float rotSpeed = 0.6f;
 
 	if (key == 'W')
 	{
-		m_forward = 1.0f;
+		m_forward = 1.0f * rotSpeed;
 	}
 	else if (key == 'S')
 	{
-		m_forward = -1.0f;
+		m_forward = -1.0f * rotSpeed;
 	}
 	else if (key == 'A')
 	{
-		m_right = -1.0f;
+		m_right = -1.0f * rotSpeed;
 	}
 	else if (key == 'D')
 	{
-		m_right = 1.0f;
+		m_right = 1.0f * rotSpeed;
 	}
 	else if (key == 'D')
 	{
-		m_right = 1.0f;
+		m_right = 1.0f * rotSpeed;
 	}
 	else if (key == 27)
 	{
@@ -231,7 +158,7 @@ void AppWindow::onKeyUp(int key)
 
 void AppWindow::onMouseMove(const Point& mousePos)
 {
-	float rotSpeed = .25f;
+	float rotSpeed = .15f;
 
 	m_rotationX += rotSpeed * m_deltaTime * (mousePos.y - (getWindowHeight() / 2.0f));
 	m_rotationY -= rotSpeed * m_deltaTime * (mousePos.x - (getWindowWidth() / 2.0f));

@@ -10,10 +10,11 @@
 #include "InputListener.h"
 #include "InputSystem.h"
 #include "Math.h"
+#include "Mesh.h"
 #include "Windows.h"
-#include "cmath"
+#include <cmath>
 
-class AppWindow: public Window, public InputListener
+class AppWindow : public Window, public InputListener
 {
 public:
 	virtual void onCreate() override;
@@ -39,6 +40,7 @@ private:
 	PixelShaderPtr m_pixelShader;
 	ConstantBufferPtr m_constBuffer;
 	TexturePtr m_woodTexture;
+	MeshPtr m_mesh;
 
 	Matrix4x4 m_worldCamera;
 

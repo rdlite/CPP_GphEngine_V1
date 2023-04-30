@@ -1,3 +1,4 @@
+#pragma once
 #include "memory"
 
 class Vector2 
@@ -325,3 +326,24 @@ static float lerp(float start, float end, float t)
 {
 	return start * (1.0f - t) + end * t;
 }
+
+class VertexMesh
+{
+public:
+	VertexMesh() : m_position(), m_texcoord()
+	{
+	}
+	VertexMesh(Vector3 position, Vector2 texcoord) : m_position(position), m_texcoord(texcoord)
+	{
+	}
+	VertexMesh(const VertexMesh& vertex) : m_position(vertex.m_position), m_texcoord(vertex.m_texcoord)
+	{
+	}
+
+	~VertexMesh()
+	{
+	}
+private:
+	Vector3 m_position;
+	Vector2 m_texcoord;
+};

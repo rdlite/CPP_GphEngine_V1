@@ -14,11 +14,11 @@ public:
 	DeviceContext(ID3D11DeviceContext* deviceContext, RenderSystem* system);
 	void clearRenderTargetColor(SwapChainPtr swapChain, float r, float g, float b, float a);
 
-	void setVertexBuffer(VertexBufferPtr vertexBuffer);
-	void setIndexBuffer(IndexBufferPtr indexBuffer);
+	void setVertexBuffer(const VertexBufferPtr& vertexBuffer);
+	void setIndexBuffer(const IndexBufferPtr& indexBuffer);
 
-	void setConstantBuffer(VertexShaderPtr shader, ConstantBufferPtr buffer);
-	void setConstantBuffer(PixelShaderPtr shader, ConstantBufferPtr buffer);
+	void setConstantBuffer(const VertexShaderPtr& shader, const ConstantBufferPtr& buffer);
+	void setConstantBuffer(const PixelShaderPtr& shader, const ConstantBufferPtr& buffer);
 
 	void drawTriangleList(UINT vertexCount, UINT startVertexIndex);
 	void drawIndexedTriangleList(UINT indexCount, UINT startVertexIndex, UINT startIndexLocation);
@@ -26,11 +26,11 @@ public:
 
 	void setViewportSize(UINT width, UINT height);
 
-	void setVertexShader(VertexShaderPtr vertexShader);
-	void setPixelShader(PixelShaderPtr pixelShader);
+	void setVertexShader(const VertexShaderPtr& vertexShader);
+	void setPixelShader(const PixelShaderPtr& pixelShader);
 
-	void setTexture(VertexShaderPtr vertexShader, TexturePtr texture);
-	void setTexture(PixelShaderPtr pixelShader, TexturePtr texture);
+	void setTexture(const VertexShaderPtr& vertexShader, const TexturePtr& texture);
+	void setTexture(const PixelShaderPtr& pixelShader, const TexturePtr& texture);
 
 	~DeviceContext();
 private:

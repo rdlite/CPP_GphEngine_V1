@@ -9,7 +9,7 @@ class Texture: public Resource
 public:
 	Texture(const wchar_t* fullPath);
 	~Texture();
-public:
+private:
 	ID3D11Resource* m_texture = nullptr;
 	ID3D11ShaderResourceView* m_shaderResourceView = nullptr;
 

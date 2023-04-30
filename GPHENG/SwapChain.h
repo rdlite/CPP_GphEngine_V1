@@ -12,8 +12,9 @@ public:
 private:
 	RenderSystem* m_system = nullptr;
 
-	IDXGISwapChain* m_swapChain;
-	ID3D11RenderTargetView* m_rtv;
+	IDXGISwapChain* m_swapChain = nullptr;
+	ID3D11RenderTargetView* m_rtv = nullptr;
+	ID3D11DepthStencilView* m_dsv = nullptr;
 
 	friend DeviceContext;
 };
