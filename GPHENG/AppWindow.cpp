@@ -6,7 +6,7 @@ void AppWindow::onCreate()
 	Window::onCreate();
 
 	//m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"..\\Assets\\Textures\\wood.jpg");
-	m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wood.jpg");
+	m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
 	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\monke.obj");
 
 	RECT rc = this->getClientWindowRect();
@@ -14,7 +14,7 @@ void AppWindow::onCreate()
 	m_swapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(
 		this->m_hwnd, (rc.right - rc.left), (rc.bottom - rc.top));
 
-	m_worldCamera.setTranslation(Vector3(0, 0, -4));
+	m_worldCamera.setTranslation(Vector3(0, 0, -1.5f));
 
 	void* shaderByteCode = nullptr;
 	size_t sizeShader = 0;
@@ -28,8 +28,7 @@ void AppWindow::onCreate()
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
 	Constants cc;
-	cc.Time = 0;
-
+	
 	m_constBuffer = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
 
 	InputSystem::get()->setCursorVisible(false);
@@ -71,18 +70,22 @@ void AppWindow::onUpdate()
 void AppWindow::update()
 {
 	Constants cc;
-	cc.Time = ::GetTickCount64();
 
-	m_deltaPos += m_deltaTime * .5f;
+	m_deltaPos += m_deltaTime * 1.5f;
 
 	Matrix4x4 temp;
+	Matrix4x4 lightRotMatrix;
+	lightRotMatrix.setIdentity();
+	lightRotMatrix.setRotationY(m_deltaPos);
+
+	cc.m_lightDirection = lightRotMatrix.getForward();
 
 	//cc.World.setScale(Vector3::lerp(Vector3(0.5f, 0.5f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), abs(sin(m_deltaPos))));
 	//cc.World *= temp;
 
-	cc.World.setScale(Vector3(1.0f, 1.0f, 1.0f) * m_scaleCube);
+	cc.m_world.setScale(Vector3(1.0f, 1.0f, 1.0f) * m_scaleCube);
 
-	cc.World.setIdentity();
+	cc.m_world.setIdentity();
 
 	Matrix4x4 worldCam;
 	worldCam.setIdentity();
@@ -98,11 +101,12 @@ void AppWindow::update()
 	Vector3 newPos = m_worldCamera.getTranslation() + worldCam.getForward() * (m_forward * flyingSpeed) + worldCam.getRight() * (m_right * flyingSpeed);
 
 	worldCam.setTranslation(newPos);
+	cc.m_cameraPosition = newPos;
 	m_worldCamera = worldCam;
 
 	worldCam.inverse();
 
-	cc.View = worldCam;
+	cc.m_view = worldCam;
 	//cc.Proj.setOrthoLH(
 	//	(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
 	//	(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
@@ -113,7 +117,7 @@ void AppWindow::update()
 	int width = getWindowWidth();
 	int height = getWindowHeight();
 
-	cc.Proj.setPerspective(
+	cc.m_proj.setPerspective(
 		1.5f, (float)(width / height), .1f, 100.0f
 	);
 

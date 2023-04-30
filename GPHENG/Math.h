@@ -107,6 +107,15 @@ public:
 		return Vector4(x * value, y * value, z * value, w * value);
 	}
 
+	Vector4 operator =(const Vector3 v3)
+	{
+		x = v3.x;
+		y = v3.y;
+		z = v3.z;
+		w = 1.0f;
+		return Vector4(v3.x, v3.y, v3.z, 1.0f);
+	}
+
 	void cross(Vector4& v1, Vector4& v2, Vector4& v3)
 	{
 		this->x = v1.y * (v2.z * v3.w - v3.z * v2.w) - v1.z * (v2.y * v3.w - v3.y * v2.w) + v1.w * (v2.y * v3.z - v2.z * v3.y);
@@ -316,10 +325,11 @@ struct Vertex
 __declspec(align(16))
 struct Constants
 {
-	Matrix4x4 World;
-	Matrix4x4 View;
-	Matrix4x4 Proj;
-	unsigned int Time;
+	Matrix4x4 m_world;
+	Matrix4x4 m_view;
+	Matrix4x4 m_proj;
+	Vector4 m_lightDirection;
+	Vector4 m_cameraPosition;
 };
 
 static float lerp(float start, float end, float t)
@@ -330,13 +340,13 @@ static float lerp(float start, float end, float t)
 class VertexMesh
 {
 public:
-	VertexMesh() : m_position(), m_texcoord()
+	VertexMesh() : m_position(), m_texcoord(), m_normal()
 	{
 	}
-	VertexMesh(Vector3 position, Vector2 texcoord) : m_position(position), m_texcoord(texcoord)
+	VertexMesh(Vector3 position, Vector2 texcoord, Vector3 normal) : m_position(position), m_texcoord(texcoord), m_normal(normal)
 	{
 	}
-	VertexMesh(const VertexMesh& vertex) : m_position(vertex.m_position), m_texcoord(vertex.m_texcoord)
+	VertexMesh(const VertexMesh& vertex) : m_position(vertex.m_position), m_texcoord(vertex.m_texcoord), m_normal(vertex.m_normal)
 	{
 	}
 
@@ -346,4 +356,5 @@ public:
 private:
 	Vector3 m_position;
 	Vector2 m_texcoord;
+	Vector3 m_normal;
 };
