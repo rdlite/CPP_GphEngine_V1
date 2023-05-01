@@ -26,6 +26,7 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="PixelShader.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="InputListener.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InputSystem.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshManager.h" />

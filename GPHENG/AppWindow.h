@@ -31,32 +31,35 @@ public:
 public:
 	void render();
 	void update();
-	void updateModel();
+	void updateModel(Vector3 position, const MaterialPtr& material);
 	void updateSkybox();
 	void updateCamera();
-	void drawMesh(
-		const MeshPtr& mesh, const VertexShaderPtr& vertexShader, const PixelShaderPtr& pixelShader,
-		const ConstantBufferPtr& constBuffer, const TexturePtr* textures, unsigned int texNums);
+	void updateLight();
+	void drawMesh(const MeshPtr& mesh, const MaterialPtr& material);
 private:
 	float getWindowWidth();
 	float getWindowHeight();
 
 	SwapChainPtr m_swapChain;
-	VertexShaderPtr m_VS;
-	PixelShaderPtr m_PS;
-	PixelShaderPtr m_skyboxPS;
 	ConstantBufferPtr m_modelCB;
 	ConstantBufferPtr m_skyboxCB;
 
-	TexturePtr m_earthColorTexture;
+	TexturePtr m_wallTexture;
+	TexturePtr m_bricksTexture;
+	TexturePtr m_earthTexture;
 	TexturePtr m_skyboxTexture;
 
-	MeshPtr m_mesh;
-	MeshPtr m_skyMesh;
+	MeshPtr m_shpereMesh, m_skyMesh;
+	MeshPtr m_torusMesh, m_monkeMesh;
+
+	MaterialPtr m_wallMat, m_skyboxMaterial;
+	MaterialPtr m_bricksMat, m_earthMat;
 
 	Matrix4x4 m_worldCamera;
 	Matrix4x4 m_viewCamera;
 	Matrix4x4 m_projCamera;
+
+	Vector4 m_lightPosition;
 
 	long double m_oldDelta = 0.0f, m_newDelta = 0.0f, m_deltaTime = 0.0f;
 	float m_deltaPos = 0.0f;

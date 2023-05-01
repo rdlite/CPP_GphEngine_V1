@@ -86,3 +86,43 @@ void GraphicsEngine::getVertexMeshLayoutShaderByteCodeAndSize(void** byteCode, s
 	*byteCode = m_meshLayoutByteCode;
 	*size = m_meshLayoutSize;
 }
+
+MaterialPtr GraphicsEngine::createMaterial(const wchar_t* VSPath, const wchar_t* PSPath)
+{
+	MaterialPtr material = nullptr;
+
+	try
+	{
+		material = std::make_shared<Material>(VSPath, PSPath);
+	}
+	catch (...) {}
+
+	return material;
+}
+
+MaterialPtr GraphicsEngine::createMaterial(const Material& material)
+{
+	MaterialPtr newmaterial = nullptr;
+
+	try
+	{
+		newmaterial = std::make_shared<Material>(material);
+	}
+	catch (...) {}
+
+	return newmaterial;
+}
+
+void GraphicsEngine::setMaterial(const Material& material)
+{
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(material.m_vs, material.m_cb);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(material.m_ps, material.m_cb);
+
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(material.m_vs);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(material.m_ps);
+
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(
+		material.m_ps,
+		&material.m_textures[0], 
+		material.m_textures.size());
+}

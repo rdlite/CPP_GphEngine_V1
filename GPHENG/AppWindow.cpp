@@ -18,10 +18,15 @@ void AppWindow::onCreate()
 {
 	Window::onCreate();
 
-	m_earthColorTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wall.jpg");
+	m_wallTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wall.jpg");
+	m_bricksTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
+	m_earthTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");;
+
 	m_skyboxTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\scene.obj");
+	m_shpereMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
+	m_torusMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\torus.obj");
+	m_monkeMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\monke.obj");
 	m_skyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
 
 	RECT rc = this->getClientWindowRect();
@@ -29,27 +34,23 @@ void AppWindow::onCreate()
 	m_swapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(
 		this->m_hwnd, (rc.right - rc.left), (rc.bottom - rc.top));
 
-	m_worldCamera.setTranslation(Vector3(0, 7, -5.5f));
+	m_worldCamera.setTranslation(Vector3(0, 0, -2.0f));
 
-	void* shaderByteCode = nullptr;
-	size_t sizeShader = 0;
+	m_wallMat = GraphicsEngine::get()->createMaterial(L"TestShader.hlsl", L"TestShader.hlsl");
+	m_wallMat->addTexture(m_wallTexture);
+	m_wallMat->setCullMode(CULL_BACK);
 
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"PointLightDemo.hlsl", "vsmain", &shaderByteCode, &sizeShader);
-	m_VS = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shaderByteCode, sizeShader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
+	m_bricksMat = GraphicsEngine::get()->createMaterial(m_wallMat);
+	m_bricksMat->addTexture(m_bricksTexture);
+	m_bricksMat->setCullMode(CULL_BACK);
 
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PointLightDemo.hlsl", "psmain", &shaderByteCode, &sizeShader);
-	m_PS = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
+	m_earthMat = GraphicsEngine::get()->createMaterial(m_bricksMat);
+	m_earthMat->addTexture(m_earthTexture);
+	m_earthMat->setCullMode(CULL_BACK);
 
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"SkyboxShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
-	m_skyboxPS = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
-	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
-
-	Constants cc;
-	
-	m_modelCB = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
-	m_skyboxCB = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
+	m_skyboxMaterial = GraphicsEngine::get()->createMaterial(L"PointLightDemo.hlsl", L"SkyboxShader.hlsl");
+	m_skyboxMaterial->addTexture(m_skyboxTexture);
+	m_skyboxMaterial->setCullMode(CULL_FRONT);
 
 	m_isPlayState = true;
 	m_isFullscreen = false;
@@ -85,20 +86,16 @@ void AppWindow::render()
 
 	update();
 
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
+	updateModel(Vector3(-4, 0, 1 * i), m_wallMat);
+	drawMesh(m_shpereMesh, m_wallMat);
 
-	TexturePtr listTex[1];
-	listTex[0] = m_earthColorTexture;
+	updateModel(Vector3(0, 0, 1 * i), m_bricksMat);
+	drawMesh(m_torusMesh, m_bricksMat);
 
-	drawMesh(
-		m_mesh, m_VS, m_PS,
-		m_modelCB, listTex, (unsigned int)ARRAYSIZE(listTex));
+	updateModel(Vector3(4, 0, 1 * i), m_earthMat);
+	drawMesh(m_monkeMesh, m_earthMat);
 
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
-
-	drawMesh(
-		m_skyMesh, m_VS, m_skyboxPS,
-		m_skyboxCB, &m_skyboxTexture, 1);
+	drawMesh(m_skyMesh, m_skyboxMaterial);
 
 	m_swapChain->present(true);
 }
@@ -106,13 +103,14 @@ void AppWindow::render()
 void AppWindow::update()
 {
 	m_deltaPos += m_deltaTime * 1.0f;
-
+	
 	updateCamera();
-	updateModel();
+	updateLight();
 	updateSkybox();
+	//updateModel(Vector3(0, 0, 0), m_meshMaterial);
 }
 
-void AppWindow::updateModel()
+void AppWindow::updateModel(Vector3 position, const MaterialPtr& material)
 {
 	Constants cc;
 
@@ -121,15 +119,17 @@ void AppWindow::updateModel()
 	lightRotMatrix.setRotationY(-m_deltaPos / 2.0f);
 
 	cc.m_world.setIdentity();
+	cc.m_world.setTranslation(position);
 	cc.m_view = m_viewCamera;
 	cc.m_proj = m_projCamera;
 	cc.m_cameraPosition = m_worldCamera.getTranslation();
+
+	cc.m_lightPosition = m_lightPosition;
+	cc.m_lightRadius = 4.0f;
 	cc.m_lightDirection = lightRotMatrix.getForward();
 	cc.m_time = m_time;
 
-	cc.m_lightPosition = Vector3(cos(m_time) * 2.0f, 1.0f, sin(m_time) * 2.0f);
-
-	m_modelCB->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
+	material->setData(&cc, sizeof(Constants));
 }
 
 void AppWindow::updateSkybox()
@@ -142,7 +142,7 @@ void AppWindow::updateSkybox()
 	cc.m_view = m_viewCamera;
 	cc.m_proj = m_projCamera;
 
-	m_skyboxCB->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
+	m_skyboxMaterial->setData(&cc, sizeof(Constants));
 }
 
 bool isShiftPressed = false;
@@ -273,16 +273,16 @@ void AppWindow::updateCamera()
 	//);
 }
 
-void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertexShader, const PixelShaderPtr& pixelShader,
-	const ConstantBufferPtr& constBuffer, const TexturePtr* textures, unsigned int texNums)
+void AppWindow::updateLight()
 {
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(vertexShader, constBuffer);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(pixelShader, constBuffer);
+	m_lightPosition = Vector3(cos(m_time) * 2.0f, 1.0f, sin(m_time) * 2.0f);
+}
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(vertexShader);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(pixelShader);
+void AppWindow::drawMesh(const MeshPtr& mesh, const MaterialPtr& material)
+{
+	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(material->getCullMode() == CULL_FRONT);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(pixelShader, textures, texNums);
+	GraphicsEngine::get()->setMaterial(*material);
 
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
