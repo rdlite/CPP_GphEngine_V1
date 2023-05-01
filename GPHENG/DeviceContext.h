@@ -29,8 +29,8 @@ public:
 	void setVertexShader(const VertexShaderPtr& vertexShader);
 	void setPixelShader(const PixelShaderPtr& pixelShader);
 
-	void setTexture(const VertexShaderPtr& vertexShader, const TexturePtr& texture);
-	void setTexture(const PixelShaderPtr& pixelShader, const TexturePtr& texture);
+	void setTexture(const VertexShaderPtr& vertexShader, const TexturePtr* texture, unsigned int texNums);
+	void setTexture(const PixelShaderPtr& pixelShader, const TexturePtr* texture, unsigned int texNums);
 
 	~DeviceContext();
 private:

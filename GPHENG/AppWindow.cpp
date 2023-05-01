@@ -1,11 +1,25 @@
 #include "AppWindow.h"
 #include "iostream"
 
+__declspec(align(16))
+struct Constants
+{
+	Matrix4x4 m_world;
+	Matrix4x4 m_view;
+	Matrix4x4 m_proj;
+	Vector4 m_lightDirection;
+	Vector4 m_cameraPosition;
+	float m_time = 0.0f;
+};
+
 void AppWindow::onCreate() 
 {
 	Window::onCreate();
 
-	m_meshTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");
+	m_earthColorTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");
+	m_earthSpecularTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_spec.jpg");
+	m_earthCloudsTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\clouds.jpg");
+	m_earthNightTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_night.jpg");
 	m_skyboxTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 
 	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere_hq.obj");
@@ -53,6 +67,11 @@ void AppWindow::onCreate()
 
 void AppWindow::onUpdate() 
 {
+	m_oldDelta = m_newDelta;
+	m_newDelta = GetTickCount64();
+	m_deltaTime = (m_oldDelta) ? (m_newDelta - m_oldDelta) / 1000.0f : 0;
+	m_time += m_deltaTime;
+
 	Window::onUpdate();
 	InputSystem::get()->update();
 	this->render();
@@ -68,20 +87,24 @@ void AppWindow::render()
 	update();
 
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
+
+	TexturePtr listTex[4];
+	listTex[0] = m_earthColorTexture;
+	listTex[1] = m_earthSpecularTexture;
+	listTex[2] = m_earthCloudsTexture;
+	listTex[3] = m_earthNightTexture;
+
 	drawMesh(
 		m_mesh, m_VS, m_PS,
-		m_modelCB, m_meshTexture);
+		m_modelCB, listTex, (unsigned int)ARRAYSIZE(listTex));
 
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
+
 	drawMesh(
 		m_skyMesh, m_VS, m_skyboxPS,
-		m_skyboxCB, m_skyboxTexture);
+		m_skyboxCB, &m_skyboxTexture, 1);
 
 	m_swapChain->present(true);
-
-	m_oldDelta = m_newDelta;
-	m_newDelta = GetTickCount64();
-	m_deltaTime = (m_oldDelta) ? (m_newDelta - m_oldDelta) / 1000.0f : 0;
 }
 
 void AppWindow::update()
@@ -99,13 +122,14 @@ void AppWindow::updateModel()
 
 	Matrix4x4 lightRotMatrix;
 	lightRotMatrix.setIdentity();
-	lightRotMatrix.setRotationY(m_deltaPos);
+	lightRotMatrix.setRotationY(-m_deltaPos / 2.0f);
 
 	cc.m_world.setIdentity();
 	cc.m_view = m_viewCamera;
 	cc.m_proj = m_projCamera;
 	cc.m_cameraPosition = m_worldCamera.getTranslation();
 	cc.m_lightDirection = lightRotMatrix.getForward();
+	cc.m_time = m_time;
 
 	m_modelCB->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
 }
@@ -240,7 +264,7 @@ void AppWindow::updateCamera()
 }
 
 void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertexShader, const PixelShaderPtr& pixelShader,
-	const ConstantBufferPtr& constBuffer, const TexturePtr& texture)
+	const ConstantBufferPtr& constBuffer, const TexturePtr* textures, unsigned int texNums)
 {
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(vertexShader, constBuffer);
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(pixelShader, constBuffer);
@@ -248,7 +272,7 @@ void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertexShade
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(vertexShader);
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(pixelShader);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(pixelShader, texture);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(pixelShader, textures, texNums);
 
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());

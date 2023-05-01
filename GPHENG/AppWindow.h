@@ -36,7 +36,7 @@ public:
 	void updateCamera();
 	void drawMesh(
 		const MeshPtr& mesh, const VertexShaderPtr& vertexShader, const PixelShaderPtr& pixelShader,
-		const ConstantBufferPtr& constBuffer, const TexturePtr& texture);
+		const ConstantBufferPtr& constBuffer, const TexturePtr* textures, unsigned int texNums);
 private:
 	float getWindowWidth();
 	float getWindowHeight();
@@ -48,7 +48,10 @@ private:
 	ConstantBufferPtr m_modelCB;
 	ConstantBufferPtr m_skyboxCB;
 
-	TexturePtr m_meshTexture;
+	TexturePtr m_earthColorTexture;
+	TexturePtr m_earthSpecularTexture;
+	TexturePtr m_earthCloudsTexture;
+	TexturePtr m_earthNightTexture;
 	TexturePtr m_skyboxTexture;
 
 	MeshPtr m_mesh;
@@ -61,6 +64,7 @@ private:
 	long double m_oldDelta = 0.0f, m_newDelta = 0.0f, m_deltaTime = 0.0f;
 	float m_deltaPos = 0.0f;
 	float m_forward = 0.0f, m_right = 0.0f;
+	long double m_time = 0.0f;
 
 	float m_cameraFarPlaneDistance = 100.0f;
 

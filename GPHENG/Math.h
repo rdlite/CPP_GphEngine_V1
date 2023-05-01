@@ -316,16 +316,6 @@ struct Vertex
 	Vector2 Texcoord;
 };
 
-__declspec(align(16))
-struct Constants
-{
-	Matrix4x4 m_world;
-	Matrix4x4 m_view;
-	Matrix4x4 m_proj;
-	Vector4 m_lightDirection;
-	Vector4 m_cameraPosition;
-};
-
 static float lerp(float start, float end, float t)
 {
 	return start * (1.0f - t) + end * t;

@@ -12,6 +12,7 @@ public:
 private:
 	ID3D11Resource* m_texture = nullptr;
 	ID3D11ShaderResourceView* m_shaderResourceView = nullptr;
+	ID3D11SamplerState* m_samplerState;
 
 	friend class DeviceContext;
 };
