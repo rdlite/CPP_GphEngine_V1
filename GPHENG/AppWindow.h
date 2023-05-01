@@ -21,6 +21,7 @@ public:
 	virtual void onUpdate() override;
 	virtual void onDestroy() override;
 	virtual void onFocus(bool isFocus) override;
+	virtual void onSize() override;
 
 	virtual void onKeyDown(int key) override;
 	virtual void onKeyUp(int key) override;
@@ -28,6 +29,7 @@ public:
 	virtual void onMouseButtonDown(int mouseButtonID, const Point& point) override;
 	virtual void onMouseButtonUp(int mouseButtonID, const Point& point) override;
 public:
+	void render();
 	void update();
 	void updateModel();
 	void updateSkybox();
@@ -65,4 +67,6 @@ private:
 	float m_rotationX = 0.0f, m_rotationY = 0.0f;
 
 	bool m_isLMouseButtonPress = false;
+	bool m_isPlayState = false;
+	bool m_isFullscreen = false;
 };

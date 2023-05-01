@@ -13,8 +13,10 @@ public:
 	virtual void onUpdate() = 0;
 	virtual void onDestroy() = 0;
 	virtual void onFocus(bool isFocus) = 0;
+	virtual void onSize() = 0;
 
 	RECT getClientWindowRect();
+	RECT getScreenSize();
 	~Window();
 protected:
 	HWND m_hwnd;

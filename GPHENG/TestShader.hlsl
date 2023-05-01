@@ -13,7 +13,7 @@ struct VS_OUTPUT
     float4 position: SV_POSITION;
     float2 texcoord: TEXCOORD0;
     float3 normal: NORMAL0;
-    float3 cameraDirection: TEXCOORD1;
+    float3 cameraDirection: NORMAL1;
 };
 
 cbuffer constant: register(b0)
@@ -41,7 +41,7 @@ VS_OUTPUT vsmain(VS_INPUT input)
 
 float4 psmain(VS_OUTPUT input) : SV_TARGET
 {
-    float ka = 0.3f;
+    float ka = 0.1f;
     float3 ia = float3(1.0f, 1.0f, 1.0f);
     float3 ambient = ka * ia;
 
@@ -52,12 +52,12 @@ float4 psmain(VS_OUTPUT input) : SV_TARGET
     float ks = 1.0f;
     float3 is = float3(1.0f, 1.0f, 1.0f);
     float3 reflectedLight = reflect(m_lightDirection.xyz, input.normal);
-    float smoothness = 30.0f;
+    float smoothness = 40.0f;
     float specular = ks * pow(max(0.0f, dot(reflectedLight, input.cameraDirection)), smoothness) * is;
 
     float3 finalLight = ambient + diffuse + specular;
 
+	//return Texture.Sample(TextureSampler, input.texcoord * 1.0f) * float4(finalLight, 1.0f);
 	//return Texture.Sample(TextureSampler, input.texcoord * 0.5f);
-	//return Texture.Sample(TextureSampler, input.texcoord * 0.5f) * float4(finalLight, 1.0f);
 	return float4(finalLight, 1.0f);
 }

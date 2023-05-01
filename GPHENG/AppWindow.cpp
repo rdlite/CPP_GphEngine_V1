@@ -5,10 +5,10 @@ void AppWindow::onCreate()
 {
 	Window::onCreate();
 
-	m_meshTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\barrel.jpg");
-	m_skyboxTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\SkyboxNew.png");
+	m_meshTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");
+	m_skyboxTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\torus.obj");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere_hq.obj");
 	m_skyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
 
 	RECT rc = this->getClientWindowRect();
@@ -38,16 +38,28 @@ void AppWindow::onCreate()
 	m_modelCB = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
 	m_skyboxCB = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
 
-	InputSystem::get()->setCursorVisible(false);
+	m_isPlayState = true;
+	m_isFullscreen = false;
+
+	InputSystem::get()->setCursorVisible(!m_isPlayState);
 	InputSystem::get()->setCursorPosition(Point(getWindowWidth() / 2.0f, getWindowHeight() / 2.0f));
+
+	if (m_isFullscreen) 
+	{
+		RECT rc = this->getScreenSize();
+		m_swapChain->setFullScreen(true, rc.right, rc.bottom);
+	}
 }
 
 void AppWindow::onUpdate() 
 {
 	Window::onUpdate();
-
 	InputSystem::get()->update();
+	this->render();
+}
 
+void AppWindow::render()
+{
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->clearRenderTargetColor(this->m_swapChain, .0f, .3f, .4f, 1);
 
 	RECT rc = this->getClientWindowRect();
@@ -90,6 +102,7 @@ void AppWindow::updateModel()
 	lightRotMatrix.setRotationY(m_deltaPos);
 
 	cc.m_world.setIdentity();
+	cc.m_world.setRotationX(91.0f);
 	cc.m_view = m_viewCamera;
 	cc.m_proj = m_projCamera;
 	cc.m_cameraPosition = m_worldCamera.getTranslation();
@@ -145,10 +158,28 @@ void AppWindow::onKeyUp(int key)
 {
 	m_forward = 0.0f;
 	m_right = 0.0f;
+
+	if (key == 'G')
+	{
+		m_isPlayState = !m_isPlayState;
+
+		InputSystem::get()->setCursorVisible(!m_isPlayState);
+	}
+	else if (key == 'F')
+	{
+		m_isFullscreen = !m_isFullscreen;
+
+		InputSystem::get()->setCursorVisible(!m_isPlayState);
+
+		RECT rc = this->getScreenSize();
+		m_swapChain->setFullScreen(m_isFullscreen, rc.right, rc.bottom);
+	}
 }
 
 void AppWindow::onMouseMove(const Point& mousePos)
 {
+	if (!m_isPlayState) return;
+
 	float rotSpeed = .15f;
 
 	m_rotationX += rotSpeed * m_deltaTime * (mousePos.y - (getWindowHeight() / 2.0f));
@@ -199,7 +230,7 @@ void AppWindow::updateCamera()
 	int height = getWindowHeight();
 
 	m_projCamera.setPerspective(
-		1.5f, (float)(width / height), .1f, m_cameraFarPlaneDistance
+		1.5f, ((float)width / (float)height), .1f, m_cameraFarPlaneDistance
 	);
 	//cc.Proj.setOrthoLH(
 	//	(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
@@ -250,7 +281,15 @@ void AppWindow::onFocus(bool isFocus)
 	}
 }
 
+void AppWindow::onSize()
+{
+	RECT rc = this->getClientWindowRect();
+	m_swapChain->resize(rc.right, rc.bottom);
+	this->render();
+}
+
 void AppWindow::onDestroy() 
 {
 	Window::onDestroy();
+	m_swapChain->setFullScreen(false, 0, 0);
 }

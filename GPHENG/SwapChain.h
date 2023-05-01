@@ -7,8 +7,12 @@ class SwapChain
 {
 public:
 	SwapChain(HWND hwnd, UINT width, UINT height, RenderSystem* system);
+	void resize(unsigned int width, unsigned int height);
+	void setFullScreen(bool isFull, unsigned int width, unsigned int height);
 	bool present(bool vsync);
 	~SwapChain();
+private:
+	void reloadBuffers(unsigned int width, unsigned int height);
 private:
 	RenderSystem* m_system = nullptr;
 
