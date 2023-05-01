@@ -41,18 +41,20 @@ VS_OUTPUT vsmain(VS_INPUT input)
 
 float4 psmain(VS_OUTPUT input) : SV_TARGET
 {
+    float3 noramizedNormal = normalize(input.normal);
+
     float ka = 0.1f;
     float3 ia = float3(1.0f, 1.0f, 1.0f);
     float3 ambient = ka * ia;
 
     float kd = 0.8f;
     float3 id = float3(1.0f, 1.0f, 1.0f);
-    float3 diffuse = kd * max(0.0f, dot(m_lightDirection.xyz, input.normal)) * id;
+    float3 diffuse = kd * max(0.0f, dot(m_lightDirection.xyz, noramizedNormal)) * id;
 
     float ks = 1.0f;
     float3 is = float3(1.0f, 1.0f, 1.0f);
-    float3 reflectedLight = reflect(m_lightDirection.xyz, input.normal);
-    float smoothness = 40.0f;
+    float3 reflectedLight = reflect(m_lightDirection.xyz, noramizedNormal);
+    float smoothness = 20.0f;
     float specular = ks * pow(max(0.0f, dot(reflectedLight, input.cameraDirection)), smoothness) * is;
 
     float3 finalLight = ambient + diffuse + specular;

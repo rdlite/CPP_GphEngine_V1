@@ -100,20 +100,14 @@ public:
 	Vector4(const Vector4& vector) : x(vector.x), y(vector.y), z(vector.z), w(vector.w)
 	{
 	}
+	Vector4(const Vector3& vector) : x(vector.x), y(vector.y), z(vector.z), w(1.0f)
+	{
+	}
 	float x, y, z, w;
 
 	Vector4 operator *(const float value)
 	{
 		return Vector4(x * value, y * value, z * value, w * value);
-	}
-
-	Vector4 operator =(const Vector3 v3)
-	{
-		x = v3.x;
-		y = v3.y;
-		z = v3.z;
-		w = 1.0f;
-		return Vector4(v3.x, v3.y, v3.z, 1.0f);
 	}
 
 	void cross(Vector4& v1, Vector4& v2, Vector4& v3)

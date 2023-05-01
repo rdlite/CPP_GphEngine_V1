@@ -97,12 +97,11 @@ void AppWindow::updateModel()
 {
 	Constants cc;
 
-	Matrix4x4 lightRotMatrix, temp;
+	Matrix4x4 lightRotMatrix;
 	lightRotMatrix.setIdentity();
 	lightRotMatrix.setRotationY(m_deltaPos);
 
 	cc.m_world.setIdentity();
-	cc.m_world.setRotationX(91.0f);
 	cc.m_view = m_viewCamera;
 	cc.m_proj = m_projCamera;
 	cc.m_cameraPosition = m_worldCamera.getTranslation();
