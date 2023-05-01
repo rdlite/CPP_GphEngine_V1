@@ -50,6 +50,8 @@ RenderSystem::RenderSystem()
 	m_d3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void**)&m_dxgiDevice);
 	m_dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&m_dxgiAdapter);
 	m_dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&m_dxgiFactory);
+
+	initRasterizerState();
 }
 
 SwapChainPtr RenderSystem::createSwapChain(
@@ -152,6 +154,19 @@ RenderSystem::~RenderSystem()
 	m_d3dDevice->Release();
 }
 
+void RenderSystem::initRasterizerState()
+{
+	D3D11_RASTERIZER_DESC desc = {};
+	desc.CullMode = D3D11_CULL_FRONT;
+	desc.DepthClipEnable = true;
+	desc.FillMode = D3D11_FILL_SOLID;
+	m_d3dDevice->CreateRasterizerState(&desc, &m_cullFront);
+
+	desc.CullMode = D3D11_CULL_BACK;
+
+	m_d3dDevice->CreateRasterizerState(&desc, &m_cullBack);
+}
+
 bool RenderSystem::compileVertexShader(
 	const wchar_t* fileName, const char* entryPointName, void** shaderByteCode, 
 	size_t* byteCodeSize)
@@ -203,5 +218,17 @@ void RenderSystem::releaseCompiledShader()
 	if (m_blob)
 	{
 		m_blob->Release();
+	}
+}
+
+void RenderSystem::setRasterizerState(bool isCullFront)
+{
+	if (isCullFront)
+	{
+		m_immContext->RSSetState(m_cullFront);
+	} 
+	else
+	{
+		m_immContext->RSSetState(m_cullBack);
 	}
 }

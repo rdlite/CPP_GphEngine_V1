@@ -22,6 +22,7 @@ public:
 		const wchar_t* fileName, const char* entryPointName, void** shaderByteCode, 
 		size_t* byteCodeSize);
 	void releaseCompiledShader();
+	void setRasterizerState(bool isCullFront);
 	SwapChainPtr createSwapChain(
 		HWND hwnd, UINT width, UINT height);
 	DeviceContextPtr getImmediateDeviceContext();
@@ -34,9 +35,14 @@ public:
 	PixelShaderPtr createPixelShader(const void* shaderByteCode, size_t byteCodeSize);
 	~RenderSystem();
 private:
+	void initRasterizerState();
+private:
 	ID3D11Device* m_d3dDevice;
 	D3D_FEATURE_LEVEL m_featureLevel;
 	ID3D11DeviceContext* m_immContext;
+
+	ID3D11RasterizerState* m_cullFront = nullptr;
+	ID3D11RasterizerState* m_cullBack = nullptr;
 
 	IDXGIDevice* m_dxgiDevice;
 	IDXGIAdapter* m_dxgiAdapter;

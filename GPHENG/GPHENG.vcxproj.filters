@@ -193,5 +193,8 @@
     <FxCompile Include="TestShader.hlsl">
       <Filter>Shaders\Tests</Filter>
     </FxCompile>
+    <FxCompile Include="SkyboxShader.hlsl">
+      <Filter>Shaders\Tests</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

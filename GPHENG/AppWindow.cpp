@@ -5,9 +5,11 @@ void AppWindow::onCreate()
 {
 	Window::onCreate();
 
-	//m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"..\\Assets\\Textures\\wood.jpg");
-	m_woodTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\monke.obj");
+	m_meshTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\barrel.jpg");
+	m_skyboxTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\SkyboxNew.png");
+
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\torus.obj");
+	m_skyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
 
 	RECT rc = this->getClientWindowRect();
 
@@ -20,16 +22,21 @@ void AppWindow::onCreate()
 	size_t sizeShader = 0;
 
 	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"TestShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
-	m_vertexShader = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shaderByteCode, sizeShader);
+	m_VS = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shaderByteCode, sizeShader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
 	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"TestShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
-	m_pixelShader = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
+	m_PS = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
+	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
+
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"SkyboxShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
+	m_skyboxPS = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
 	Constants cc;
 	
-	m_constBuffer = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
+	m_modelCB = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
+	m_skyboxCB = GraphicsEngine::get()->getRenderSystem()->createConstantBuffer(&cc, sizeof(Constants));
 
 	InputSystem::get()->setCursorVisible(false);
 	InputSystem::get()->setCursorPosition(Point(getWindowWidth() / 2.0f, getWindowHeight() / 2.0f));
@@ -48,17 +55,15 @@ void AppWindow::onUpdate()
 
 	update();
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(m_vertexShader, m_constBuffer);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(m_pixelShader, m_constBuffer);
+	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
+	drawMesh(
+		m_mesh, m_VS, m_PS,
+		m_modelCB, m_meshTexture);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(m_vertexShader);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(m_pixelShader);
-
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(m_pixelShader, m_woodTexture);
-
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(m_mesh->getVertexBuffer());
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(m_mesh->getIndexBuffer());
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(m_mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
+	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(true);
+	drawMesh(
+		m_skyMesh, m_VS, m_skyboxPS,
+		m_skyboxCB, m_skyboxTexture);
 
 	m_swapChain->present(true);
 
@@ -69,59 +74,41 @@ void AppWindow::onUpdate()
 
 void AppWindow::update()
 {
+	m_deltaPos += m_deltaTime * 1.0f;
+
+	updateCamera();
+	updateModel();
+	updateSkybox();
+}
+
+void AppWindow::updateModel()
+{
 	Constants cc;
 
-	m_deltaPos += m_deltaTime * 1.5f;
-
-	Matrix4x4 temp;
-	Matrix4x4 lightRotMatrix;
+	Matrix4x4 lightRotMatrix, temp;
 	lightRotMatrix.setIdentity();
 	lightRotMatrix.setRotationY(m_deltaPos);
 
+	cc.m_world.setIdentity();
+	cc.m_view = m_viewCamera;
+	cc.m_proj = m_projCamera;
+	cc.m_cameraPosition = m_worldCamera.getTranslation();
 	cc.m_lightDirection = lightRotMatrix.getForward();
 
-	//cc.World.setScale(Vector3::lerp(Vector3(0.5f, 0.5f, 1.0f), Vector3(1.0f, 1.0f, 1.0f), abs(sin(m_deltaPos))));
-	//cc.World *= temp;
+	m_modelCB->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
+}
 
-	cc.m_world.setScale(Vector3(1.0f, 1.0f, 1.0f) * m_scaleCube);
+void AppWindow::updateSkybox()
+{
+	Constants cc;
 
 	cc.m_world.setIdentity();
+	cc.m_world.setScale(Vector3(1.0f, 1.0f, 1.0f) * m_cameraFarPlaneDistance);
+	cc.m_world.setTranslation(m_worldCamera.getTranslation());
+	cc.m_view = m_viewCamera;
+	cc.m_proj = m_projCamera;
 
-	Matrix4x4 worldCam;
-	worldCam.setIdentity();
-	temp.setIdentity();
-	temp.setRotationX(m_rotationX);	
-	worldCam *= temp;
-	temp.setIdentity();
-	temp.setRotationY(m_rotationY);
-	worldCam *= temp;
-
-	float flyingSpeed = .1f;
-
-	Vector3 newPos = m_worldCamera.getTranslation() + worldCam.getForward() * (m_forward * flyingSpeed) + worldCam.getRight() * (m_right * flyingSpeed);
-
-	worldCam.setTranslation(newPos);
-	cc.m_cameraPosition = newPos;
-	m_worldCamera = worldCam;
-
-	worldCam.inverse();
-
-	cc.m_view = worldCam;
-	//cc.Proj.setOrthoLH(
-	//	(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
-	//	(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
-	//	-4.0f,
-	//	4.0f
-	//);
-
-	int width = getWindowWidth();
-	int height = getWindowHeight();
-
-	cc.m_proj.setPerspective(
-		1.5f, (float)(width / height), .1f, 100.0f
-	);
-
-	m_constBuffer->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
+	m_skyboxCB->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
 }
 
 void AppWindow::onKeyDown(int key)
@@ -184,6 +171,59 @@ void AppWindow::onMouseButtonUp(int mouseButtonID, const Point& point)
 	{
 		m_isLMouseButtonPress = false;
 	}
+}
+
+void AppWindow::updateCamera()
+{
+	Matrix4x4 worldCam, temp;
+	worldCam.setIdentity();
+	temp.setIdentity();
+	temp.setRotationX(m_rotationX);
+	worldCam *= temp;
+	temp.setIdentity();
+	temp.setRotationY(m_rotationY);
+	worldCam *= temp;
+
+	float flyingSpeed = .1f;
+
+	Vector3 newPos = m_worldCamera.getTranslation() + worldCam.getForward() * (m_forward * flyingSpeed) + worldCam.getRight() * (m_right * flyingSpeed);
+
+	worldCam.setTranslation(newPos);
+	m_worldCamera = worldCam;
+
+	worldCam.inverse();
+
+	m_viewCamera = worldCam;
+
+	int width = getWindowWidth();
+	int height = getWindowHeight();
+
+	m_projCamera.setPerspective(
+		1.5f, (float)(width / height), .1f, m_cameraFarPlaneDistance
+	);
+	//cc.Proj.setOrthoLH(
+	//	(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
+	//	(this->getClientWindowRect().bottom - this->getClientWindowRect().top) / 300.0f,
+	//	-4.0f,
+	//	4.0f
+	//);
+}
+
+void AppWindow::drawMesh(const MeshPtr& mesh, const VertexShaderPtr& vertexShader, const PixelShaderPtr& pixelShader,
+	const ConstantBufferPtr& constBuffer, const TexturePtr& texture)
+{
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(vertexShader, constBuffer);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(pixelShader, constBuffer);
+
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(vertexShader);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(pixelShader);
+
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(pixelShader, texture);
+
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(
+		mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
 }
 
 float AppWindow::getWindowWidth()

@@ -22,32 +22,45 @@ public:
 	virtual void onDestroy() override;
 	virtual void onFocus(bool isFocus) override;
 
-	void update();
-
 	virtual void onKeyDown(int key) override;
 	virtual void onKeyUp(int key) override;
 	virtual void onMouseMove(const Point& mousePos) override;
 	virtual void onMouseButtonDown(int mouseButtonID, const Point& point) override;
 	virtual void onMouseButtonUp(int mouseButtonID, const Point& point) override;
+public:
+	void update();
+	void updateModel();
+	void updateSkybox();
+	void updateCamera();
+	void drawMesh(
+		const MeshPtr& mesh, const VertexShaderPtr& vertexShader, const PixelShaderPtr& pixelShader,
+		const ConstantBufferPtr& constBuffer, const TexturePtr& texture);
 private:
 	float getWindowWidth();
 	float getWindowHeight();
 
 	SwapChainPtr m_swapChain;
-	VertexBufferPtr m_vertexBuffer;
-	IndexBufferPtr m_indexBuffer;
-	VertexShaderPtr m_vertexShader;
-	PixelShaderPtr m_pixelShader;
-	ConstantBufferPtr m_constBuffer;
-	TexturePtr m_woodTexture;
+	VertexShaderPtr m_VS;
+	PixelShaderPtr m_PS;
+	PixelShaderPtr m_skyboxPS;
+	ConstantBufferPtr m_modelCB;
+	ConstantBufferPtr m_skyboxCB;
+
+	TexturePtr m_meshTexture;
+	TexturePtr m_skyboxTexture;
+
 	MeshPtr m_mesh;
+	MeshPtr m_skyMesh;
 
 	Matrix4x4 m_worldCamera;
+	Matrix4x4 m_viewCamera;
+	Matrix4x4 m_projCamera;
 
 	long double m_oldDelta = 0.0f, m_newDelta = 0.0f, m_deltaTime = 0.0f;
 	float m_deltaPos = 0.0f;
-	float m_scaleCube = 1.0f;
 	float m_forward = 0.0f, m_right = 0.0f;
+
+	float m_cameraFarPlaneDistance = 100.0f;
 
 	float m_rotationX = 0.0f, m_rotationY = 0.0f;
 
