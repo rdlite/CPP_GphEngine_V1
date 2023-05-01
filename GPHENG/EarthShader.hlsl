@@ -29,8 +29,6 @@ cbuffer constant: register(b0)
     row_major float4x4 m_proj;
     float4 m_lightDirection;
     float4 m_cameraPosition;
-    float4 m_lightPosition;
-    float m_lightRadius;
     float m_time;
 };
 

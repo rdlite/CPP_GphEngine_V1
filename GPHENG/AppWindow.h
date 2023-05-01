@@ -49,9 +49,6 @@ private:
 	ConstantBufferPtr m_skyboxCB;
 
 	TexturePtr m_earthColorTexture;
-	TexturePtr m_earthSpecularTexture;
-	TexturePtr m_earthCloudsTexture;
-	TexturePtr m_earthNightTexture;
 	TexturePtr m_skyboxTexture;
 
 	MeshPtr m_mesh;

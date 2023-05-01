@@ -9,6 +9,8 @@ struct Constants
 	Matrix4x4 m_proj;
 	Vector4 m_lightDirection;
 	Vector4 m_cameraPosition;
+	Vector4 m_lightPosition = Vector4(0, 1, 0, 0);
+	float m_lightRadius = 4.0f;
 	float m_time = 0.0f;
 };
 
@@ -16,13 +18,10 @@ void AppWindow::onCreate()
 {
 	Window::onCreate();
 
-	m_earthColorTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");
-	m_earthSpecularTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_spec.jpg");
-	m_earthCloudsTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\clouds.jpg");
-	m_earthNightTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_night.jpg");
+	m_earthColorTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wall.jpg");
 	m_skyboxTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
 
-	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere_hq.obj");
+	m_mesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\scene.obj");
 	m_skyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
 
 	RECT rc = this->getClientWindowRect();
@@ -30,16 +29,16 @@ void AppWindow::onCreate()
 	m_swapChain = GraphicsEngine::get()->getRenderSystem()->createSwapChain(
 		this->m_hwnd, (rc.right - rc.left), (rc.bottom - rc.top));
 
-	m_worldCamera.setTranslation(Vector3(0, 0, -1.5f));
+	m_worldCamera.setTranslation(Vector3(0, 7, -5.5f));
 
 	void* shaderByteCode = nullptr;
 	size_t sizeShader = 0;
 
-	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"TestShader.hlsl", "vsmain", &shaderByteCode, &sizeShader);
+	GraphicsEngine::get()->getRenderSystem()->compileVertexShader(L"PointLightDemo.hlsl", "vsmain", &shaderByteCode, &sizeShader);
 	m_VS = GraphicsEngine::get()->getRenderSystem()->createVertexShader(shaderByteCode, sizeShader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
-	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"TestShader.hlsl", "psmain", &shaderByteCode, &sizeShader);
+	GraphicsEngine::get()->getRenderSystem()->compilePixelShader(L"PointLightDemo.hlsl", "psmain", &shaderByteCode, &sizeShader);
 	m_PS = GraphicsEngine::get()->getRenderSystem()->createPixelShader(shaderByteCode, sizeShader);
 	GraphicsEngine::get()->getRenderSystem()->releaseCompiledShader();
 
@@ -88,11 +87,8 @@ void AppWindow::render()
 
 	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(false);
 
-	TexturePtr listTex[4];
+	TexturePtr listTex[1];
 	listTex[0] = m_earthColorTexture;
-	listTex[1] = m_earthSpecularTexture;
-	listTex[2] = m_earthCloudsTexture;
-	listTex[3] = m_earthNightTexture;
 
 	drawMesh(
 		m_mesh, m_VS, m_PS,
@@ -131,6 +127,8 @@ void AppWindow::updateModel()
 	cc.m_lightDirection = lightRotMatrix.getForward();
 	cc.m_time = m_time;
 
+	cc.m_lightPosition = Vector3(cos(m_time) * 2.0f, 1.0f, sin(m_time) * 2.0f);
+
 	m_modelCB->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
 }
 
@@ -147,9 +145,13 @@ void AppWindow::updateSkybox()
 	m_skyboxCB->update(GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext(), &cc);
 }
 
+bool isShiftPressed = false;
+
 void AppWindow::onKeyDown(int key)
 {
-	float rotSpeed = 0.6f;
+	float shiftSpeed = 4.0f;
+
+	float rotSpeed = 0.6f * (isShiftPressed ? shiftSpeed : 1.0f);
 
 	if (key == 'W')
 	{
@@ -175,6 +177,10 @@ void AppWindow::onKeyDown(int key)
 	{
 		//CloseWindow(m_hwnd);
 	}
+	else if (key == VK_SHIFT)
+	{
+		isShiftPressed = true;
+	}
 }
 
 void AppWindow::onKeyUp(int key)
@@ -196,6 +202,10 @@ void AppWindow::onKeyUp(int key)
 
 		RECT rc = this->getScreenSize();
 		m_swapChain->setFullScreen(m_isFullscreen, rc.right, rc.bottom);
+	}
+	else if (key == VK_SHIFT)
+	{
+		isShiftPressed = false;
 	}
 }
 
@@ -238,7 +248,7 @@ void AppWindow::updateCamera()
 	temp.setRotationY(m_rotationY);
 	worldCam *= temp;
 
-	float flyingSpeed = .1f;
+	float flyingSpeed = .025f;
 
 	Vector3 newPos = m_worldCamera.getTranslation() + worldCam.getForward() * (m_forward * flyingSpeed) + worldCam.getRight() * (m_right * flyingSpeed);
 
@@ -253,7 +263,7 @@ void AppWindow::updateCamera()
 	int height = getWindowHeight();
 
 	m_projCamera.setPerspective(
-		1.5f, ((float)width / (float)height), .1f, m_cameraFarPlaneDistance
+		1.5f, ((float)width / (float)height), .01f, m_cameraFarPlaneDistance
 	);
 	//cc.Proj.setOrthoLH(
 	//	(this->getClientWindowRect().right - this->getClientWindowRect().left) / 300.0f,
