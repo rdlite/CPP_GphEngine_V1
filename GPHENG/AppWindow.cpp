@@ -86,13 +86,13 @@ void AppWindow::render()
 
 	update();
 
-	updateModel(Vector3(-4, 0, 1 * i), m_wallMat);
+	updateModel(Vector3(-4, 0, 0), m_wallMat);
 	drawMesh(m_shpereMesh, m_wallMat);
 
-	updateModel(Vector3(0, 0, 1 * i), m_bricksMat);
+	updateModel(Vector3(0, 0, 0), m_bricksMat);
 	drawMesh(m_torusMesh, m_bricksMat);
 
-	updateModel(Vector3(4, 0, 1 * i), m_earthMat);
+	updateModel(Vector3(4, 0, 0), m_earthMat);
 	drawMesh(m_monkeMesh, m_earthMat);
 
 	drawMesh(m_skyMesh, m_skyboxMaterial);
