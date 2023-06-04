@@ -1,4 +1,5 @@
 #include "GraphicsEngine.h"
+#include "iostream"
 
 GraphicsEngine* GraphicsEngine::m_engine = nullptr;
 
@@ -113,16 +114,16 @@ MaterialPtr GraphicsEngine::createMaterial(const Material& material)
 	return newmaterial;
 }
 
-void GraphicsEngine::setMaterial(const Material& material)
+void GraphicsEngine::setMaterial(const MaterialPtr& material)
 {
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(material.m_vs, material.m_cb);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(material.m_ps, material.m_cb);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(material->m_vs, material->m_cb);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setConstantBuffer(material->m_ps, material->m_cb);
 
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(material.m_vs);
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(material.m_ps);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexShader(material->m_vs);
+	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setPixelShader(material->m_ps);
 
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setTexture(
-		material.m_ps,
-		&material.m_textures[0], 
-		material.m_textures.size());
+		material->m_ps,
+		&material->m_textures[0],
+		material->m_textures.size());
 }

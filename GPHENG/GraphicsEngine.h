@@ -22,7 +22,7 @@ public:
 	void getVertexMeshLayoutShaderByteCodeAndSize(void** byteCode, size_t* size);
 	MaterialPtr createMaterial(const wchar_t* VSPath, const wchar_t* PSPath);
 	MaterialPtr createMaterial(const Material& material);
-	void setMaterial(const Material& material);
+	void setMaterial(const MaterialPtr& material);
 private:
 	RenderSystem* m_renderSystem = nullptr;
 	TextureManager* m_textureManager = nullptr;

@@ -18,16 +18,19 @@ void AppWindow::onCreate()
 {
 	Window::onCreate();
 
-	m_wallTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\wall.jpg");
-	m_bricksTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\brick.png");
-	m_earthTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\earth_color.jpg");;
+	FolderPathes pathes;
 
-	m_skyboxTexture = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(L"Assets\\Textures\\stars_map.jpg");
+	m_skyboxTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(pathes.texturesFolder(L"sky.jpg").c_str());
 
-	m_shpereMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
-	m_torusMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\torus.obj");
-	m_monkeMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\monke.obj");
-	m_skyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(L"Assets\\Meshes\\sphere.obj");
+	m_sandTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(pathes.texturesFolder(L"sand.jpg").c_str());
+	m_barrelTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(pathes.texturesFolder(L"barrel.jpg").c_str());
+	m_brickTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(pathes.texturesFolder(L"house_brick.jpg").c_str());
+	m_windowTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(pathes.texturesFolder(L"house_windows.jpg").c_str());
+	m_woodTex = GraphicsEngine::get()->getTextureManager()->createTextureFromFile(pathes.texturesFolder(L"house_wood.jpg").c_str());
+
+	m_skyMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(pathes.meshesFolder(L"sphere.obj").c_str());
+	m_terrainMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(pathes.meshesFolder(L"terrain.obj").c_str());
+	m_houseMesh = GraphicsEngine::get()->getMeshManager()->createMeshFromFile(pathes.meshesFolder(L"house.obj").c_str());
 
 	RECT rc = this->getClientWindowRect();
 
@@ -36,21 +39,29 @@ void AppWindow::onCreate()
 
 	m_worldCamera.setTranslation(Vector3(0, 0, -2.0f));
 
-	m_wallMat = GraphicsEngine::get()->createMaterial(L"TestShader.hlsl", L"TestShader.hlsl");
-	m_wallMat->addTexture(m_wallTexture);
-	m_wallMat->setCullMode(CULL_BACK);
+	m_terrainMat = GraphicsEngine::get()->createMaterial(L"TestShader.hlsl", L"TestShader.hlsl");
+	m_terrainMat->addTexture(m_sandTex);
+	m_terrainMat->setCullMode(CULL_BACK);
 
-	m_bricksMat = GraphicsEngine::get()->createMaterial(m_wallMat);
-	m_bricksMat->addTexture(m_bricksTexture);
-	m_bricksMat->setCullMode(CULL_BACK);
+	m_brickMat = GraphicsEngine::get()->createMaterial(m_terrainMat);
+	m_brickMat->addTexture(m_brickTex);
+	m_brickMat->setCullMode(CULL_BACK);
 
-	m_earthMat = GraphicsEngine::get()->createMaterial(m_bricksMat);
-	m_earthMat->addTexture(m_earthTexture);
-	m_earthMat->setCullMode(CULL_BACK);
+	m_woodMat = GraphicsEngine::get()->createMaterial(m_brickMat);
+	m_woodMat->addTexture(m_woodTex);
+	m_woodMat->setCullMode(CULL_BACK);
 
-	m_skyboxMaterial = GraphicsEngine::get()->createMaterial(L"PointLightDemo.hlsl", L"SkyboxShader.hlsl");
-	m_skyboxMaterial->addTexture(m_skyboxTexture);
-	m_skyboxMaterial->setCullMode(CULL_FRONT);
+	m_windowsMat = GraphicsEngine::get()->createMaterial(m_brickMat);
+	m_windowsMat->addTexture(m_windowTex);
+	m_windowsMat->setCullMode(CULL_BACK);
+
+	m_barrelMat = GraphicsEngine::get()->createMaterial(m_brickMat);
+	m_barrelMat->addTexture(m_barrelTex);
+	m_barrelMat->setCullMode(CULL_BACK);
+
+	m_skyboxMat = GraphicsEngine::get()->createMaterial(L"PointLightDemo.hlsl", L"SkyboxShader.hlsl");
+	m_skyboxMat->addTexture(m_skyboxTex);
+	m_skyboxMat->setCullMode(CULL_FRONT);
 
 	m_isPlayState = true;
 	m_isFullscreen = false;
@@ -63,6 +74,8 @@ void AppWindow::onCreate()
 		RECT rc = this->getScreenSize();
 		m_swapChain->setFullScreen(true, rc.right, rc.bottom);
 	}
+
+	m_listMaterials.reserve(32);
 }
 
 void AppWindow::onUpdate() 
@@ -86,16 +99,34 @@ void AppWindow::render()
 
 	update();
 
-	updateModel(Vector3(-4, 0, 0), m_wallMat);
-	drawMesh(m_shpereMesh, m_wallMat);
+	m_listMaterials.clear();
+	m_listMaterials.push_back(m_terrainMat);
 
-	updateModel(Vector3(0, 0, 0), m_bricksMat);
-	drawMesh(m_torusMesh, m_bricksMat);
+	updateModel(Vector3(0, -1, 0), m_listMaterials);
+	drawMesh(m_terrainMesh, m_listMaterials);
 
-	updateModel(Vector3(4, 0, 0), m_earthMat);
-	drawMesh(m_monkeMesh, m_earthMat);
+	int grid = 10;
+	float distance = 10;
 
-	drawMesh(m_skyMesh, m_skyboxMaterial);
+	for (int i = 0; i < grid; i++)
+	{
+		for (int j = 0; j < grid; j++)
+		{
+			m_listMaterials.clear();
+			m_listMaterials.push_back(m_barrelMat);
+			m_listMaterials.push_back(m_brickMat);
+			m_listMaterials.push_back(m_windowsMat);
+			m_listMaterials.push_back(m_woodMat);
+
+			updateModel(Vector3((i - grid / 2) * distance, -1, (j - grid / 2) * distance), m_listMaterials);
+			drawMesh(m_houseMesh, m_listMaterials);
+		}
+	}
+
+	m_listMaterials.clear();
+	m_listMaterials.push_back(m_skyboxMat);
+
+	drawMesh(m_skyMesh, m_listMaterials);
 
 	m_swapChain->present(true);
 }
@@ -107,16 +138,16 @@ void AppWindow::update()
 	updateCamera();
 	updateLight();
 	updateSkybox();
-	//updateModel(Vector3(0, 0, 0), m_meshMaterial);
 }
 
-void AppWindow::updateModel(Vector3 position, const MaterialPtr& material)
+void AppWindow::updateModel(Vector3 position, const std::vector<MaterialPtr>& listMaterials)
 {
 	Constants cc;
 
 	Matrix4x4 lightRotMatrix;
 	lightRotMatrix.setIdentity();
-	lightRotMatrix.setRotationY(-m_deltaPos / 2.0f);
+	lightRotMatrix.setRotationX(-45.0f);
+	lightRotMatrix.setRotationY(m_deltaPos * 0.2f);
 
 	cc.m_world.setIdentity();
 	cc.m_world.setTranslation(position);
@@ -129,7 +160,10 @@ void AppWindow::updateModel(Vector3 position, const MaterialPtr& material)
 	cc.m_lightDirection = lightRotMatrix.getForward();
 	cc.m_time = m_time;
 
-	material->setData(&cc, sizeof(Constants));
+	for (size_t m = 0; m < listMaterials.size(); m++)
+	{
+		listMaterials[m]->setData(&cc, sizeof(Constants));
+	}
 }
 
 void AppWindow::updateSkybox()
@@ -142,7 +176,7 @@ void AppWindow::updateSkybox()
 	cc.m_view = m_viewCamera;
 	cc.m_proj = m_projCamera;
 
-	m_skyboxMaterial->setData(&cc, sizeof(Constants));
+	m_skyboxMat->setData(&cc, sizeof(Constants));
 }
 
 bool isShiftPressed = false;
@@ -275,19 +309,25 @@ void AppWindow::updateCamera()
 
 void AppWindow::updateLight()
 {
-	m_lightPosition = Vector3(cos(m_time) * 2.0f, 1.0f, sin(m_time) * 2.0f);
+	//m_lightPosition = Vector3(cos(m_time) * 2.0f, 1.0f, sin(m_time) * 2.0f);
+	m_lightPosition = Vector3(0.0f, -0.0f, 0.0f);
 }
 
-void AppWindow::drawMesh(const MeshPtr& mesh, const MaterialPtr& material)
+void AppWindow::drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& listMaterials)
 {
-	GraphicsEngine::get()->getRenderSystem()->setRasterizerState(material->getCullMode() == CULL_FRONT);
-
-	GraphicsEngine::get()->setMaterial(*material);
-
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setVertexBuffer(mesh->getVertexBuffer());
 	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->setIndexBuffer(mesh->getIndexBuffer());
-	GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(
-		mesh->getIndexBuffer()->getSizeIndexList(), 0, 0);
+
+	for (size_t m = 0; m < mesh->getNumMaterialSlots(); m++)
+	{
+		if (m >= listMaterials.size()) break;
+
+		MaterialSlot mat = mesh->getMaterialSlot(m);
+		GraphicsEngine::get()->getRenderSystem()->setRasterizerState(listMaterials[m]->getCullMode() == CULL_FRONT);
+		GraphicsEngine::get()->setMaterial(listMaterials[m]);
+		GraphicsEngine::get()->getRenderSystem()->getImmediateDeviceContext()->drawIndexedTriangleList(
+			mat.numIndicies, 0, mat.startIndex);
+	}
 }
 
 float AppWindow::getWindowWidth()

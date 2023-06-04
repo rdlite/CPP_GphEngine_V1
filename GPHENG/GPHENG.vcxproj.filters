@@ -58,6 +58,9 @@
     <Filter Include="Shaders\Tests">
       <UniqueIdentifier>{ee3559a2-e9a9-401b-8386-688392cb177a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="App\Utils">
+      <UniqueIdentifier>{f505dac0-94fb-441f-9868-fdbe1259e9d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppWindow.cpp">
@@ -117,6 +120,7 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
     </ClCompile>
+    <ClCompile Include="Material.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppWindow.h">
@@ -185,6 +189,10 @@
     <ClInclude Include="Mesh.h">
       <Filter>GameEngine\GraphicsEngine\ResourceManager\MeshManager</Filter>
     </ClInclude>
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="FolderPathes.h">
+      <Filter>App\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexMeshLayoutShader.hlsl">
@@ -196,5 +204,7 @@
     <FxCompile Include="SkyboxShader.hlsl">
       <Filter>Shaders\Tests</Filter>
     </FxCompile>
+    <FxCompile Include="EarthShader.hlsl" />
+    <FxCompile Include="PointLightDemo.hlsl" />
   </ItemGroup>
 </Project>

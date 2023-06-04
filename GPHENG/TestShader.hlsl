@@ -46,7 +46,7 @@ float4 psmain(VS_OUTPUT input) : SV_TARGET
 {
     float3 noramizedNormal = normalize(input.normal);
 
-    float4 albedoColor = Texture.Sample(TextureSampler, input.texcoord * 0.5f);
+    float4 albedoColor = Texture.Sample(TextureSampler, float2(input.texcoord.x, 1.0f - input.texcoord.y));
     float ka = 0.1f;
     float3 ia = float3(1.0f, 1.0f, 1.0f);
     float3 ambient = ka * ia;
@@ -55,7 +55,7 @@ float4 psmain(VS_OUTPUT input) : SV_TARGET
     float3 id = float3(1.0f, 1.0f, 1.0f);
     float3 diffuse = kd * max(0.0f, dot(m_lightDirection.xyz, input.normal)) * id;
 
-    float ks = 1.0f;
+    float ks = 0.0f;
     float3 is = float3(1.0f, 1.0f, 1.0f);
     float3 reflectedLight = reflect(m_lightDirection.xyz, input.normal);
     float smoothness = 10.0f;

@@ -1,5 +1,6 @@
 #pragma once
 #include "Window.h"
+#include "FolderPathes.h"
 #include "GraphicsEngine.h"
 #include "SwapChain.h"
 #include "DeviceContext.h"
@@ -31,11 +32,11 @@ public:
 public:
 	void render();
 	void update();
-	void updateModel(Vector3 position, const MaterialPtr& material);
+	void updateModel(Vector3 position, const std::vector<MaterialPtr>& listMaterials);
 	void updateSkybox();
 	void updateCamera();
 	void updateLight();
-	void drawMesh(const MeshPtr& mesh, const MaterialPtr& material);
+	void drawMesh(const MeshPtr& mesh, const std::vector<MaterialPtr>& listMaterials);
 private:
 	float getWindowWidth();
 	float getWindowHeight();
@@ -44,20 +45,29 @@ private:
 	ConstantBufferPtr m_modelCB;
 	ConstantBufferPtr m_skyboxCB;
 
-	TexturePtr m_wallTexture;
-	TexturePtr m_bricksTexture;
-	TexturePtr m_earthTexture;
-	TexturePtr m_skyboxTexture;
+	TexturePtr m_skyboxTex;
+	TexturePtr m_sandTex;
+	TexturePtr m_barrelTex;
+	TexturePtr m_brickTex;
+	TexturePtr m_windowTex;
+	TexturePtr m_woodTex;
 
-	MeshPtr m_shpereMesh, m_skyMesh;
-	MeshPtr m_torusMesh, m_monkeMesh;
+	MeshPtr m_skyMesh;
+	MeshPtr m_terrainMesh;
+	MeshPtr m_houseMesh;
 
-	MaterialPtr m_wallMat, m_skyboxMaterial;
-	MaterialPtr m_bricksMat, m_earthMat;
+	MaterialPtr m_skyboxMat;
+	MaterialPtr m_terrainMat;
+	MaterialPtr m_barrelMat;
+	MaterialPtr m_brickMat;
+	MaterialPtr m_windowsMat;
+	MaterialPtr m_woodMat;
 
 	Matrix4x4 m_worldCamera;
 	Matrix4x4 m_viewCamera;
 	Matrix4x4 m_projCamera;
+
+	std::vector<MaterialPtr> m_listMaterials;
 
 	Vector4 m_lightPosition;
 
