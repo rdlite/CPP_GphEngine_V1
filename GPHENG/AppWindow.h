@@ -32,7 +32,7 @@ public:
 public:
 	void render();
 	void update();
-	void updateModel(Vector3 position, const std::vector<MaterialPtr>& listMaterials);
+	void updateModel(Vector3 position, Vector3 rotation, const std::vector<MaterialPtr>& listMaterials);
 	void updateSkybox();
 	void updateCamera();
 	void updateLight();

@@ -1,5 +1,6 @@
 #include "GraphicsEngine.h"
 #include "iostream"
+#include "FolderPathes.h"
 
 GraphicsEngine* GraphicsEngine::m_engine = nullptr;
 
@@ -35,8 +36,10 @@ GraphicsEngine::GraphicsEngine()
 	void* shaderByteCode = nullptr;
 	size_t sizeShader = 0;
 
+	FolderPathes pathes;
+
 	m_renderSystem->compileVertexShader(
-		L"VertexMeshLayoutShader.hlsl", "vsmain", &shaderByteCode, 
+		pathes.shadersFolder(L"VertexMeshLayoutShader.hlsl").c_str(), "vsmain", &shaderByteCode,
 		&sizeShader);
 	::memcpy(m_meshLayoutByteCode, shaderByteCode, sizeShader);
 	m_meshLayoutSize = sizeShader;

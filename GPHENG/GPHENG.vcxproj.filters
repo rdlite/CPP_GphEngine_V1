@@ -55,9 +55,6 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{0e649bd4-2a8a-4366-9bec-3975edb177a4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Tests">
-      <UniqueIdentifier>{ee3559a2-e9a9-401b-8386-688392cb177a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="App\Utils">
       <UniqueIdentifier>{f505dac0-94fb-441f-9868-fdbe1259e9d1}</UniqueIdentifier>
     </Filter>
@@ -195,16 +192,20 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexMeshLayoutShader.hlsl">
-      <Filter>GameEngine\GraphicsEngine</Filter>
+    <FxCompile Include="Shaders\EarthShader.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="TestShader.hlsl">
-      <Filter>Shaders\Tests</Filter>
+    <FxCompile Include="Shaders\PointLightDemo.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SkyboxShader.hlsl">
-      <Filter>Shaders\Tests</Filter>
+    <FxCompile Include="Shaders\SkyboxShader.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="EarthShader.hlsl" />
-    <FxCompile Include="PointLightDemo.hlsl" />
+    <FxCompile Include="Shaders\TestShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VertexMeshLayoutShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

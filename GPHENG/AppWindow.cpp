@@ -39,7 +39,12 @@ void AppWindow::onCreate()
 
 	m_worldCamera.setTranslation(Vector3(0, 0, -2.0f));
 
-	m_terrainMat = GraphicsEngine::get()->createMaterial(L"TestShader.hlsl", L"TestShader.hlsl");
+	std::wstring testShaderPash = pathes.shadersFolder(L"TestShader.hlsl");
+	std::wstring skyboxShaderPash = pathes.shadersFolder(L"SkyboxShader.hlsl");
+
+	m_terrainMat = GraphicsEngine::get()->createMaterial(
+		testShaderPash.c_str(),
+		testShaderPash.c_str());
 	m_terrainMat->addTexture(m_sandTex);
 	m_terrainMat->setCullMode(CULL_BACK);
 
@@ -59,7 +64,9 @@ void AppWindow::onCreate()
 	m_barrelMat->addTexture(m_barrelTex);
 	m_barrelMat->setCullMode(CULL_BACK);
 
-	m_skyboxMat = GraphicsEngine::get()->createMaterial(L"PointLightDemo.hlsl", L"SkyboxShader.hlsl");
+	m_skyboxMat = GraphicsEngine::get()->createMaterial(
+		testShaderPash.c_str(),
+		skyboxShaderPash.c_str());
 	m_skyboxMat->addTexture(m_skyboxTex);
 	m_skyboxMat->setCullMode(CULL_FRONT);
 
@@ -102,10 +109,10 @@ void AppWindow::render()
 	m_listMaterials.clear();
 	m_listMaterials.push_back(m_terrainMat);
 
-	updateModel(Vector3(0, -1, 0), m_listMaterials);
+	updateModel(Vector3(0, -1, 0), Vector3(0, 0, 0), m_listMaterials);
 	drawMesh(m_terrainMesh, m_listMaterials);
 
-	int grid = 10;
+	int grid = 5;
 	float distance = 10;
 
 	for (int i = 0; i < grid; i++)
@@ -118,7 +125,10 @@ void AppWindow::render()
 			m_listMaterials.push_back(m_windowsMat);
 			m_listMaterials.push_back(m_woodMat);
 
-			updateModel(Vector3((i - grid / 2) * distance, -1, (j - grid / 2) * distance), m_listMaterials);
+			updateModel(
+				Vector3((i - grid / 2) * distance, -1, (j - grid / 2) * distance), 
+				Vector3(0, 30 * i, 0), 
+				m_listMaterials);
 			drawMesh(m_houseMesh, m_listMaterials);
 		}
 	}
@@ -140,18 +150,30 @@ void AppWindow::update()
 	updateSkybox();
 }
 
-void AppWindow::updateModel(Vector3 position, const std::vector<MaterialPtr>& listMaterials)
+void AppWindow::updateModel(Vector3 position, Vector3 rotation, const std::vector<MaterialPtr>& listMaterials)
 {
 	Constants cc;
 
-	Matrix4x4 lightRotMatrix;
+	Matrix4x4 lightRotMatrix, temp;
 	lightRotMatrix.setIdentity();
 	lightRotMatrix.setRotationX(-45.0f);
 	lightRotMatrix.setRotationY(m_deltaPos * 0.2f);
 
 	cc.m_world.setIdentity();
+
+	temp.setIdentity();
+	temp.setRotationX(rotation.x);
+	cc.m_world *= temp;
+	temp.setIdentity();
+	temp.setRotationY(rotation.y);
+	cc.m_world *= temp;
+	temp.setIdentity();
+	temp.setRotationZ(rotation.z);
+	cc.m_world *= temp;
+
 	cc.m_world.setTranslation(position);
 	cc.m_view = m_viewCamera;
+
 	cc.m_proj = m_projCamera;
 	cc.m_cameraPosition = m_worldCamera.getTranslation();
 
